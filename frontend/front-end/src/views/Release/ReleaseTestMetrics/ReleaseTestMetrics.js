@@ -14,12 +14,13 @@ import {
     getTCStrategyForUISubDomainsDistribution, getTCStrategyForUIDomainsDistribution
 } from '../../../reducers/release.reducer';
 import { getEachTCStrategyScenario } from '../../../reducers/testcase.reducer';
-import { TABLE_OPTIONS } from '../../../constants';
+import { roles, workingStatuses, tcTypes } from '../../../constants';
 import { Bar, Doughnut, Line, Pie, Polar, Radar } from 'react-chartjs-2';
 import { AgGridReact } from 'ag-grid-react';
 import axios from 'axios';
 import { saveTestCase, saveTestCaseStatus, saveSingleTestCase } from '../../../actions';
 import TestCases from '../../../components/TestCases/TestCases';
+import TestCasesAll from '../../../components/TestCasesAll/TestCasesAll';
 import './ReleaseTestMetrics.scss'
 import Sunburst from '../components/Sunburst';
 import { CustomTooltips } from '@coreui/coreui-plugin-chartjs-custom-tooltips';
@@ -142,8 +143,14 @@ class ReleaseTestMetrics extends Component {
         let op = this.props.selectedRelease.OrchestrationPlatform ? this.props.selectedRelease.OrchestrationPlatform.map(item => ({ value: item })) : [];
         return (
             <div>
-                <TestCases></TestCases>
-                {/* <TestCasesAll></TestCasesAll> */}
+                <TestCases title={'Test Cases'} type='all'></TestCases>
+                {/* <TestCasesAll title={tcTypes.PFAPPROVAL.title} type={tcTypes.PFAPPROVAL.type}></TestCasesAll>
+                <TestCasesAll title={tcTypes.PFASSIGN.title} type={tcTypes.PFASSIGN.type}></TestCasesAll>
+                <TestCasesAll title={tcTypes.ASSIGNAUTO.title} type={tcTypes.ASSIGNAUTO.type}></TestCasesAll>
+                <TestCasesAll title={tcTypes.ASSIGNREGRESSION.title} type={tcTypes.ASSIGNREGRESSION.type}></TestCasesAll>
+                <TestCasesAll title={tcTypes.ASSIGNEDAUTO.title} type={tcTypes.ASSIGNEDAUTO.type}></TestCasesAll>
+                <TestCasesAll title={tcTypes.ASSIGNEDREGRESSION.title} type={tcTypes.ASSIGNEDREGRESSION.type}></TestCasesAll>
+                <TestCasesAll title={tcTypes.MPFAPPROVAL.title} type={tcTypes.MPFAPPROVAL.type}></TestCasesAll> */}
                 {
                     this.props.currentUser &&
                     <CreateTCs isEditing={true} update={() => this.save()}></CreateTCs>

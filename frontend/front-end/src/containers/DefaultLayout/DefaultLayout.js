@@ -51,8 +51,8 @@ const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 class DefaultLayout extends Component {
   GoogleAuth;
   auth2;
-  // SCOPE = 'https://www.googleapis.com/auth/drive.metadata.readonly';
-  SCOPE = 'profile';
+  SCOPE = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+  // SCOPE = 'profile';
   userNotificationsInterval = null;
   userEmail = null;
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
@@ -75,6 +75,7 @@ class DefaultLayout extends Component {
     this.GoogleAuth = gapi.auth2.getAuthInstance();
     let user = this.GoogleAuth.currentUser.get();
     let isAuthorized = user.hasGrantedScopes(this.SCOPE);
+    console.log('got user ', user)
     if (isAuthorized) {
       this.loginBackend(user)
     } else {
@@ -88,7 +89,7 @@ class DefaultLayout extends Component {
     this.stopPolling();
     if (this.props.currentUser) {
       this.props.clearUserData();
-
+      // this.props.history.push('/login')
       this.GoogleAuth.signOut().then(() => {
         this.props.history.push('/login')
       })
@@ -115,13 +116,12 @@ class DefaultLayout extends Component {
         return;
       }
       this.userEmail = newProps.currentUser.email;
-      this.startPolling(newProps.currentUser.email, new Date().toISOString());
+      // this.startPolling(newProps.currentUser.email, new Date().toISOString());
     }
   }
   componentDidMount() {
     // this.props.logInSuccess({ email: 'yatish@diamati.com', isAdmin: true, role: 'ADMIN', name: 'Yatish' });
     gapi.load('auth2', () => {
-
       let auth2 = gapi.auth2.init({
         'apiKey': 'AIzaSyAxV1LfUI_TIjiQ2b8rW0fVYdMwHPeKQTYY',
         client_id: '271454306292-fnma4vrg7dssj2opv4jovof9v8uq8n1l.apps.googleusercontent.com',
@@ -130,7 +130,7 @@ class DefaultLayout extends Component {
       }).then(() => {
         // Listen for sign-in state changes.
         // this.GoogleAuth.isSignedIn.listen((data) => this.updateSigninStatus(data));
-
+          
         // Handle initial sign-in state. (Determine if user is already signed in.)
         this.setSigninStatus();
       }).catch(err => { console.log('cannot get details') });

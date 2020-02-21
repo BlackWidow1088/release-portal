@@ -8,6 +8,7 @@ import sygnet from '../../assets/img/brand/diamanti_small.jpg'
 import userIcon from '../../assets/img/ico-user-circle.svg'
 import { connect } from 'react-redux';
 import './DefaultContainer.scss';
+import { GoogleLogout } from 'react-google-login';
 
 const propTypes = {
   children: PropTypes.node,
@@ -142,7 +143,6 @@ class DefaultHeader extends Component {
                     <DropdownItem onClick={() => this.props.history.push('/release/manage')}><i className="fas fa-archive"></i>Release Settings</DropdownItem>
                   }
                   <DropdownItem onClick={() => this.props.onLogout()}><i className="fa fa-lock"></i>Logout</DropdownItem>
-
                 </React.Fragment>
               }
 

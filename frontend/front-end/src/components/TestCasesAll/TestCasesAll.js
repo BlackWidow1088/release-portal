@@ -6,11 +6,13 @@
 // ExpectedBehaviour and Steps not updating
 //  Working Status: Deleted, and others
 // User list from backend
+// 73/deepak/deploy/crd
 import React, { Component, Fragment } from 'react';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { getCurrentRelease, getTCForStrategy } from '../../reducers/release.reducer';
-import { saveSingleTestCase, saveTestCase, updateTCEdit } from '../../actions';
+import { getEachTCStatusScenario } from '../../reducers/testcase.reducer';
+import { saveSingleTestCase, saveTestCase, updateTCEdit, saveReleaseBasicInfo } from '../../actions';
 import {
     Badge, Card, CardBody, CardHeader, Col, Pagination, PaginationItem, PaginationLink, Row, Table, Button,
     UncontrolledPopover, PopoverHeader, PopoverBody,
@@ -28,10 +30,11 @@ import SelectionEditor from './selectionEditor';
 import { getDatePicker } from './datepicker';
 import DatePickerEditor from './datePickerEditor';
 import EditTC from '../../views/Release/ReleaseTestMetrics/EditTC';
+import {roles, workingStatuses, tcTypes} from '../../constants';
+
 // import { data, domains, subDomains } from './constants';
 // "Description": "Enable helm", "ExpectedBehaviour": "dctl feature list should display helm as enabled", "Notes": "NOTES NOT PROVIDED"
 class TestCasesAll extends Component {
-    selection = [];
     cntr = 0;
     pageNumber = 0;
     rows = 15;
@@ -43,71 +46,11 @@ class TestCasesAll extends Component {
         this.state = {
             selectedRows: 0,
             totalRows: 0,
-            allRows: 0,
-            failRows: 0,
-            automatedRows: 0,
-            passRows: 0,
             overlayLoadingTemplate: '<span class="ag-overlay-loading-center">Please wait while table or Tc is loading</span>',
             overlayNoRowsTemplate: '<span class="ag-overlay-loading-center">No rows to show</span>',
             rowSelect: false,
             isEditing: false,
             delete: false,
-            editColumnDefs: [
-                {
-                    headerName: "Date", field: "Date", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Domain", field: "Domain", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "SubDomain", field: "SubDomain", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Scenario", field: "Scenario", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Tc ID", field: "TcID", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Tc Name", field: "TcName", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-
-                },
-                {
-                    headerName: "Server Type", field: "ServerType", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Status", field: "StatusList[0].Result", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "OrchestrationPlatform", field: "OrchestrationPlatform", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Description", field: "Description", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Steps", field: "Steps", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "ExpectedBehavior", field: "ExpectedBehavior", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Master", field: "Master", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Assignee", field: "Assignee", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Tag", field: "Tag", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-
-            ],
-
             columnDefs: [
                 {
                     headerCheckboxSelection: (params) => {
@@ -175,24 +118,9 @@ class TestCasesAll extends Component {
                     headerName: "Working Status", field: "WorkingStatus", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
                     cellClass: 'cell-wrap-text',
                 },
-                // {
-                //     headerName: "Server Type", field: "ServerType", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-
-                //     cellEditor: 'selectionEditor',
-                //     cellClass: 'cell-wrap-text',
-                //     cellEditorParams: {
-                //         values: ['UNKNOWN']
-                //     }
-                // },
                 {
                     headerName: "Tc Name", field: "TcName", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                 },
-                // {
-                //     headerName: "Domain", field: "Domain", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                // },
-                // {
-                //     headerName: "SubDomain", field: "SubDomain", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                // }
             ],
             defaultColDef: { resizable: true },
 
@@ -294,9 +222,9 @@ class TestCasesAll extends Component {
         this.props.saveSingleTestCase({});
         this.props.updateTCEdit({ Master: true, errors: {}, original: null });
         if (!updateTotalRows) {
-            this.setState({ multi: {}, totalRows: this.gridApi.getModel().rowsToDisplay.length, selectedRows: this.gridApi.getSelectedRows().length })
+            this.setState({ multi: {}, allRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0, totalRows: this.gridApi.getModel().rowsToDisplay.length, selectedRows: this.gridApi.getSelectedRows().length })
         } else {
-            this.setState({ multi: {}, selectedRows: 0, totalRows: 0 })
+            this.setState({ multi: {}, allRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0, selectedRows: 0, totalRows: 0 })
         }
     }
     renderSmallCell = (params) => {
@@ -305,11 +233,6 @@ class TestCasesAll extends Component {
         }
     }
     renderEditedCell = (params) => {
-        // if(params.data) {
-        //     console.log(this.editedRows[`${params.data.TcID}_${params.data.CardType}`][params.colDef.field]);
-        //     console.log(params.value)
-        // }
-        console.log(params);
         let editedInRow = this.editedRows[`${params.data.TcID}_${params.data.CardType}`] && this.editedRows[`${params.data.TcID}_${params.data.CardType}`][params.colDef.field] && this.editedRows[`${params.data.TcID}_${params.data.CardType}`][params.colDef.field].originalValue !== params.value;
         // let restored = this.editedRows[`${params.data.TcID}_${params.data.CardType}`] && this.editedRows[`${params.data.TcID}_${params.data.CardType}`][params.colDef.field] && this.editedRows[`${params.data.TcID}_${params.data.CardType}`][params.colDef.field].originalValue === params.value;
         if (editedInRow) {
@@ -321,10 +244,6 @@ class TestCasesAll extends Component {
                 borderColor: 'rgb(255, 166, 0)'
             };
         }
-        // if (restored) {
-        //     console.log('restoried')
-        //     this.editedRows[`${params.data.TcID}_${params.data.CardType}`].Changed = false;
-        // }
         return { backgroundColor: '' };
     }
     numberParser(params) {
@@ -356,8 +275,6 @@ class TestCasesAll extends Component {
         }
     }
     onCellEditing = (params, field, value) => {
-        console.log('current')
-        console.log(this.editedRows);
         if (this.editedRows[`${params.TcID}_${params.CardType}`]) {
             if (this.editedRows[`${params.TcID}_${params.CardType}`][field]) {
                 this.editedRows[`${params.TcID}_${params.CardType}`][field] =
@@ -374,13 +291,10 @@ class TestCasesAll extends Component {
                 [field]: { oldValue: params[field], originalValue: params[field], newValue: value }
             }
         }
-        console.log('upadred')
-        console.log(this.editedRows);
     }
 
     getEditedCells() {
         var cellDefs = this.gridApi.getEditingCells();
-        console.log('edited cells ', cellDefs);
     }
     onFilterTextBoxChanged(value) {
         this.setState({ rowSelect: false });
@@ -401,16 +315,38 @@ class TestCasesAll extends Component {
     toggleDelete = () => {
         this.setState({ delete: !this.state.delete })
     };
+    toggleAll = () => {
+        this.setState({ multipleChanges: !this.state.multipleChanges })
+    };
     onSelectDomain(domain) {
         this.deselect(true);
         if (domain === '') {
             domain = null;
+        } else {
+            this.getTcByDomain(domain);
         }
+        
         // let data = this.filterData({ Domain: domain, SubDomain: null, CardType: this.state.CardType });
         this.setState({ domain: domain, subDomain: '' });
-        this.getTcs(this.state.CardType, domain);
-
-
+        this.getTcs(this.state.CardType, domain, '', this.state.Priority);
+    }
+    getTcByDomain(domain) {
+        this.gridOperations(false);
+        axios.get('/api/' + this.props.selectedRelease.ReleaseNumber + '/tcinfo/domain/' + domain)
+        .then(all => {
+            if (all && all.data.length) {
+                axios.get('/api/' + this.props.selectedRelease.ReleaseNumber + '/tcstatus/domain/' + domain)
+                    .then(res => {
+                        this.gridOperations(true);
+                        // this.props.saveTestCase({ id: this.props.selectedRelease.ReleaseNumber, data: res.data })
+                        this.setState({ doughnuts: getEachTCStatusScenario({ data: res.data, domain: domain, all: all.data }) })
+                    }, error => {
+                        this.gridOperations(true);
+                    });
+            }
+        }, error => {
+            this.gridOperations(true);
+        })
     }
     onSelectSubDomain(subDomain) {
         this.deselect(true);
@@ -419,7 +355,7 @@ class TestCasesAll extends Component {
         }
         // let data = this.filterData({ Domain: this.state.domain, SubDomain: subDomain, CardType: this.state.CardType })
         this.setState({ subDomain: subDomain });
-        this.getTcs(this.state.CardType, this.state.domain, subDomain);
+        this.getTcs(this.state.CardType, this.state.domain, subDomain, this.state.Priority);
 
 
     }
@@ -430,102 +366,59 @@ class TestCasesAll extends Component {
         }
         //let data = this.filterData({ Domain: this.state.domain, SubDomain: this.state.subDomain, CardType: cardType });
         this.setState({ CardType: cardType });
-        this.getTcs(cardType, this.state.domain, this.state.subDomain);
+        this.getTcs(cardType, this.state.domain, this.state.subDomain, this.state.Priority);
 
     }
+    onSelectPriority(priority) {
+        this.deselect(true);
+        if (priority === '') {
+            priority = null;
+        }
+        //let data = this.filterData({ Domain: this.state.domain, SubDomain: this.state.subDomain, CardType: cardType });
+        this.setState({ Priority: priority });
+        this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain, priority);
+    }
     rowSelect(e) {
-        console.log('model')
-        console.log(this.gridApi.getModel())
-        this.setState({ isEditing: false, rowSelect: true, toggleMessage: null, selectedRows: this.gridApi.getSelectedRows().length, totalRows: this.gridApi.getModel().rowsToDisplay.length })
+        this.setState({
+            isEditing: false, rowSelect: true, toggleMessage: null, allRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0,
+            selectedRows: this.gridApi.getSelectedRows().length, totalRows: this.gridApi.getModel().rowsToDisplay.length
+        })
         this.getTC(e.data);
     }
-    keepGettingData = () => {
-        if (!this.props.selectedRelease.ReleaseNumber) {
+    getTcs(CardType, domain, subDomain, priority, all, selectedRelease) {
+        let release = selectedRelease ? selectedRelease : this.props.selectedRelease.ReleaseNumber;
+        if (!release) {
             return;
         }
-        if (this.state.CardType || this.state.domain || this.state.subDomain) {
-            return;
-        }
-        let rows = this.props.data && this.props.data.length > 0 ? 500 : 15;
-        let total = this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0
-        let startingIndex = this.pageNumber * rows;
-        if (this.startingIndex >= total) {
-            return;
-        }
-        // let totalTcs =
-        let url = `/api/wholetcinfo/${this.props.selectedRelease.ReleaseNumber}?index=${startingIndex}&count=${rows}`;
-        // let url = `/api/wholetcinfo/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.get(url)
-            .then(all => {
-                // Filters should not go away if data is reloaded
-                //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
-                if (this.state.CardType || this.state.domain || this.state.subDomain) {
-                    // indexedResult = false;
-                    return;
-                }
-                let data = [];
-                if (this.props.data && this.props.data.length > 0) {
-                    data = [...this.props.data, ...all.data];
-                } else {
-                    data = all.data
-                    this.setState({
-                        totalRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0,
-                        selectedRows: 0
-                    })
-                }
-                this.selection = this.gridApi.getSelectedRows();
-                // this.gridApi.setRowData(data)
-                this.props.saveTestCase({ data: data, id: this.props.selectedRelease.ReleaseNumber });
-                // setTimeout(this.gridApi.refreshView(), 0)
-                // this.deselect();
-                // this.gridOperations(true);
-                this.pageNumber += 1;
-                setTimeout(() => this.keepGettingData(), 100);
-            }).catch(err => {
-                if (this.state.CardType || this.state.domain || this.state.subDomain) {
-                    // indexedResult = false;
-                    return;
-                }
-                setTimeout(() => this.keepGettingData(), 100);
-                // this.deselect();
-                // this.gridOperations(true);
-            })
-    }
-    getTcs(CardType, domain, subDomain) {
-        if (!this.props.selectedRelease.ReleaseNumber) {
-            return;
-        }
-        let startingIndex = this.pageNumber * this.rows;
         this.gridOperations(false);
+        let startingIndex = this.pageNumber * this.rows;
         this.deselect(true);
-        let url = `/api/wholetcinfo/${this.props.selectedRelease.ReleaseNumber}?index=${startingIndex}&count=${this.rows}`;
-        // let url = `/api/wholetcinfo/${this.props.selectedRelease.ReleaseNumber}`;
-        if (CardType || domain || this.state.subDomain) {
-            // indexedResult = false;
-            url = `/api/wholetcinfo/${this.props.selectedRelease.ReleaseNumber}?`;
+        this.props.saveTestCase({ data: [], id: release });
+        this.props.saveSingleTestCase({});
+        let url = `/api/wholetcinfo/${release}?index=${startingIndex}&count=${this.rows}`;
+        if (all) {
+            url = `/api/wholetcinfo/${release}`;
+        }
+        if (CardType || domain || subDomain || priority) {
+            if (priority === 'Skip') {
+                priority = 'Skp';
+            }
+            url = `/api/wholetcinfo/${release}?`;
             if (CardType) url += ('&CardType=' + CardType);
             if (domain) url += ('&Domain=' + domain);
             if (subDomain) url += ('&SubDomain=' + subDomain);
-        } else {
-            this.pageNumber = 0;
-            this.setState({
-                totalRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0,
-                selectedRows: 0
-            })
-            setTimeout(() => this.keepGettingData(), 100)
-            return;
+            if (priority) url += ('&Priority=' + priority);
         }
-        this.props.saveTestCase({ data: [], id: this.props.selectedRelease.ReleaseNumber });
-        this.props.saveSingleTestCase({});
         console.log(url);
         axios.get(url)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
-                this.props.saveTestCase({ data: all.data, id: this.props.selectedRelease.ReleaseNumber });
-                setTimeout(this.gridApi.refreshView(), 0)
+                this.props.saveTestCase({ data: all.data, id: release });
+                setTimeout(this.gridApi.redrawRows(), 0)
                 this.deselect();
                 this.gridOperations(true);
+
             }).catch(err => {
                 this.deselect();
                 this.gridOperations(true);
@@ -546,51 +439,50 @@ class TestCasesAll extends Component {
         this.isAnyChanged = false;
         this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain);
     }
-
     saveAll() {
         this.gridOperations(false);
         let items = [];
-        // Object.keys(this.editedRows).forEach(item => {
-        //     if (this.editedRows[item] && this.editedRows[item].Changed) {
-        //         // let assignee = this.editedRows[item].Assignee.newValue && this.editedRows[item].Assignee.newValue !== 'ADMIN' 
-        //         // ? this.editedRows[item].Assignee.newValue : 'ADMIN';
-        //         // let ws = assignee === 'ADMIN' ? 'UNASSIGNED' : 'MANUAL_ASSIGNED'
-        //         let pushable = {
-        //             TcID: this.editedRows[item].TcID.newValue,
-        //             CardType: this.editedRows[item].CardType.newValue
-        //         };
-        //         if(this.editedRows[item].Priority) {
-        //             if (this.editedRows[item].Priority.newValue === 'Skip') {
-        //                 this.editedRows[item].Priority.newValue = 'Skp';
-        //             }
-        //             pushable.Priority = this.editedRows[item].Priority.newValue
-        //         }
-        //         if(this.editedRows[item].Assignee) {
-        //             pushable.Assignee = this.editedRows[item].Assignee.newValue
-        //         }
-        //         if(this.editedRows[item].WorkingStatus) {
-        //             pushable.WorkingStatus = this.editedRows[item].WorkingStatus.newValue
-        //         }
-        //         items.push(pushable);
-        //     }
-        // });
         let selectedRows = this.gridApi.getSelectedRows();
         selectedRows.forEach(item => {
             let pushable = {
                 TcID: item.TcID,
-                CardType: item.CardType
+                CardType: item.CardType,
+                Activity: {
+                    Release: this.props.selectedRelease.ReleaseNumber,
+                    "TcID": item.TcID,
+                    CardType: item.CardType,
+                    "UserName": this.props.user.email,
+                    LogData: ``,
+                    "RequestType": 'PUT',
+                    "URL": `/api/tcupdate/${this.props.selectedRelease.ReleaseNumber}`
+                }
             };
             if (item.Priority) {
                 if (item.Priority === 'Skip') {
                     item.Priority = 'Skp';
                 }
                 pushable.Priority = item.Priority
+                let old = item.Priority;
+                if (this.editedRows[`${item.TcID}_${item.CardType}`] && this.editedRows[`${item.TcID}_${item.CardType}`].Priority) {
+                    old = `${this.editedRows[`${item.TcID}_${item.CardType}`].Priority.originalValue}`
+                }
+                pushable.Activity.LogData += `Priority:{old: ${old}, new: ${item.Priority}}, `
             }
             if (item.Assignee) {
                 pushable.Assignee = item.Assignee
+                let old = item.Assignee;
+                if (this.editedRows[`${item.TcID}_${item.CardType}`] && this.editedRows[`${item.TcID}_${item.CardType}`].Assignee) {
+                    old = `${this.editedRows[`${item.TcID}_${item.CardType}`].Assignee.originalValue}`
+                }
+                pushable.Activity.LogData += `Assignee:{old: ${old}, new: ${item.Assignee}}, `
             }
             if (item.WorkingStatus) {
                 pushable.WorkingStatus = item.WorkingStatus
+                let old = item.WorkingStatus;
+                if (this.editedRows[`${item.TcID}_${item.CardType}`] && this.editedRows[`${item.TcID}_${item.CardType}`].WorkingStatus) {
+                    old = `${this.editedRows[`${item.TcID}_${item.CardType}`].WorkingStatus.originalValue}`
+                }
+                pushable.Activity.LogData += `WorkingStatus:{old: ${old}, new: ${item.WorkingStatus}}, `
             }
             items.push(pushable);
         })
@@ -603,12 +495,9 @@ class TestCasesAll extends Component {
                 this.setState({ errors: {}, toggleMessage: `TCs Updated Successfully` });
                 this.toggle();
                 this.undo();
-
             }, error => {
                 this.gridOperations(true);
-                this.undo();
                 alert('failed to update TCs');
-
             });
         this.props.updateTCEdit({ Master: true, errors: {} });
         this.setState({ rowSelect: false, toggleMessage: null, isEditing: false, multi: { Priority: '', Assignee: '', WorkingStatus: '' } })
@@ -658,7 +547,7 @@ class TestCasesAll extends Component {
     gridOperations(enable) {
         if (enable) {
             if (this.state.isApiUnderProgress) {
-                this.setState({ isApiUnderProgress: false });
+                this.setState({ isApiUnderProgress: false, loading: false });
             }
         } else {
             if (!this.state.isApiUnderProgress) {
@@ -686,8 +575,12 @@ class TestCasesAll extends Component {
         if (data.Priority === 'Skip') {
             data.Priority = 'Skp';
         }
+
         if (this.props.testcaseEdit.CurrentStatus === 'Pass' || this.props.testcaseEdit.CurrentStatus === 'Fail') {
             let status = {};
+            status.Domain = this.props.tcDetails.Domain;
+            status.SubDomain = this.props.tcDetails.SubDomain;
+            status.TcName = this.props.tcDetails.TcName;
             status.Build = this.props.testcaseEdit.Build;
             status.Result = this.props.testcaseEdit.CurrentStatus;
             status.CardType = this.props.tcDetails.CardType;
@@ -704,28 +597,59 @@ class TestCasesAll extends Component {
             axios.post(`/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}`, { ...status })
                 .then(res => {
                     console.log('updated status')
-                    setTimeout(() => axios.put(`/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${this.props.tcDetails.CardType}`, { ...data })
+                    if (this.props.testcaseEdit.NewTcID) {
+                        data.NewTcID = this.props.testcaseEdit.NewTcID
+                        data.Activity.LogData += `NewTcId: ${this.props.testcaseEdit.NewTcID} updated`
+                    }
+                    if(data.Activity.LogData.length<5) {
+                        this.setState({ errors: {}, toggleMessage: `TC ${data.TcID} Updated Successfully` });
+                        this.deselect();
+                        this.toggle();
+                        axios.get(`/api/release/all`)
                         .then(res => {
-                            this.setState({ addTC: { Master: true, Domain: '' }, errors: {}, toggleMessage: `TC ${this.props.testcaseEdit.TcID} Updated Successfully` });
+                          res.data.forEach(item => {
+                            // this.props.updateNavBar({ id: item.ReleaseNumber });
+                            this.props.saveReleaseBasicInfo({ id: item.ReleaseNumber, data: item });
+                          });
+                        }, error => {
+                        });
+                        setTimeout(() => {
+                            this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain);
+                            this.gridOperations(true);
+                        }, 400);
+                    } else {
+                        setTimeout(() => axios.put(`/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${this.props.tcDetails.CardType}`, { ...data })
+                        .then(res => {
+                            this.setState({ errors: {}, toggleMessage: `TC ${data.TcID} Updated Successfully` });
                             this.deselect();
                             this.toggle();
-
+                            axios.get(`/api/release/all`)
+                            .then(res => {
+                              res.data.forEach(item => {
+                                // this.props.updateNavBar({ id: item.ReleaseNumber });
+                                this.props.saveReleaseBasicInfo({ id: item.ReleaseNumber, data: item });
+                              });
+                            }, error => {
+                            });
                             setTimeout(() => {
-
                                 this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain);
                                 this.gridOperations(true);
-                            }, 1000);
+                            }, 400);
                         }, error => {
-
                             alert('failed to update tc')
                             this.gridOperations(true);
-                        }, 1000));
+                        }, 400));
+                    }
                 }, error => {
                     alert('failed to update tc')
                     console.log('failed updating status')
                     this.gridOperations(true);
                 });
         } else {
+            if (this.props.testcaseEdit.NewTcID) {
+                data.NewTcID = this.props.testcaseEdit.NewTcID
+                data.Activity.LogData += `NewTcId: ${this.props.testcaseEdit.NewTcID} updated`
+            }
             axios.put(`/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${this.props.tcDetails.CardType}`, { ...data })
                 .then(res => {
                     this.setState({ addTC: { Master: true, Domain: '' }, errors: {}, toggleMessage: `TC ${this.props.testcaseEdit.TcID} Updated Successfully` });
@@ -734,14 +658,10 @@ class TestCasesAll extends Component {
                     setTimeout(() => {
                         this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain);
                         this.gridOperations(true);
-                    }, 1000);
+                    }, 400);
                 }, error => {
                     alert('failed to update tc')
-                    this.deselect();
-                    setTimeout(() => {
-                        this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain)
-                        this.gridOperations(true);
-                    }, 1000);
+                    this.gridOperations(true);
                 });
         }
         this.setState({ toggleMessage: null, isEditing: false })
@@ -764,7 +684,7 @@ class TestCasesAll extends Component {
         if (this.pageNumber < 0) {
             this.pageNumber = 0;
         }
-        this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain);
+        this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain, this.state.priority);
     }
     delete() {
         if (this.props.tcDetails.TcID) {
@@ -784,14 +704,30 @@ class TestCasesAll extends Component {
         this.buildGridColumnApi = params.columnApi;
         params.api.sizeColumnsToFit();
     }
+    initialize() {
+
+    }
     componentDidMount() {
-        // setTimeout(() => this.keepGettingData(), 100);
-        setTimeout(() => this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain), 1000);
+        setTimeout(() => this.getTcs(this.state.CardType, this.state.domain, this.state.subDomain), 400);
         if (this.props.user &&
             (this.props.user.role === 'ADMIN' || this.props.user.role === 'QA' || this.props.user.role === 'DEV' ||
                 this.props.user.role === 'ENGG')) {
             this.setState({ tcOpen: true })
         }
+    }
+    componentWillReceiveProps(newProps) {
+        if(this.props.selectedRelease && newProps.selectedRelease && this.props.selectedRelease.ReleaseNumber !== newProps.selectedRelease.ReleaseNumber) {
+            this.editedRows = {};
+            this.isAnyChanged = false;
+            this.setState({
+                rowSelect: false, CardType: '', domain: '', subDomain: '',Priority: '',
+                isEditing: false})
+            setTimeout(() => this.getTcs(null, null, null, null, null, newProps.selectedRelease.ReleaseNumber), 400);
+        }
+    }
+    getAlltcs() {
+        this.setState({ loading: true })
+        this.getTcs(null, null, null, null, true);
     }
     render() {
         let domains = this.props.selectedRelease.TcAggregate && this.props.selectedRelease.TcAggregate.AvailableDomainOptions && Object.keys(this.props.selectedRelease.TcAggregate.AvailableDomainOptions);
@@ -804,7 +740,6 @@ class TestCasesAll extends Component {
         }
         if (this.gridApi) {
             if (this.state.isApiUnderProgress) {
-
                 this.gridApi.showLoadingOverlay();
             } else if (this.props.data && this.props.data.length === 0) {
                 this.gridApi.showNoRowsOverlay();
@@ -812,12 +747,48 @@ class TestCasesAll extends Component {
                 this.gridApi.hideOverlay();
             }
         }
-        // if (this.selection) {
-        //     this.selection.forEach(item => {
-        //         item.setSelected(true);
-        //     })
-        // }
 
+        let pass=0,fail=0,automated=0,total=0;
+        if(this.state.domain && this.state.doughnuts) {
+            if(this.state.CardType) {
+               let card = this.state.doughnuts.filter(d => d.CardType === this.state.CardType)[0];
+               if(card) {
+                if(this.state.subDomain && card.SubDomains[this.state.subDomain]) {
+                    pass = card.SubDomains[this.state.subDomain].Pass;
+                    fail = card.SubDomains[this.state.subDomain].Fail;
+                    total = card.SubDomains[this.state.subDomain].Total; 
+                } else {
+                    Object.keys(card.SubDomains).forEach(subdomain => {
+                        pass += card.SubDomains[subdomain].Pass;
+                        fail += card.SubDomains[subdomain].Fail;
+                        total += card.SubDomains[subdomain].Total;
+                    })
+                }
+               }
+               } else {
+                this.state.doughnuts.forEach(card => {
+                    if(this.state.subDomain && card.SubDomains[this.state.subDomain]) {
+                        pass += card.SubDomains[this.state.subDomain].Pass;
+                        fail += card.SubDomains[this.state.subDomain].Fail;
+                        total += card.SubDomains[this.state.subDomain].Total; 
+                    } else {
+                        Object.keys(card.SubDomains).forEach(subdomain => {
+                            pass += card.SubDomains[subdomain].Pass;
+                            fail += card.SubDomains[subdomain].Fail;
+                            total += card.SubDomains[subdomain].Total;
+                        })
+                    }
+                });
+               }
+        } else {
+            if(this.props.selectedRelease && this.props.selectedRelease.TcAggregate) {
+                let tcAggr = this.props.selectedRelease.TcAggregate.all;
+                pass = tcAggr.Tested.manual.Pass + tcAggr.Tested.auto.Pass;
+                // automated = tcAggr.Tested.auto.Pass + tcAggr.Tested.auto.Fail;
+                fail = tcAggr.Tested.manual.Fail + tcAggr.Tested.auto.Fail;
+                total = pass+fail+tcAggr.Tested.manual.Skip+tcAggr.Tested.auto.Skip+tcAggr.NotTested+tcAggr.NotApplicable
+            }
+        }
         return (
             <div>
                 <Row>
@@ -836,39 +807,20 @@ class TestCasesAll extends Component {
                                                 <i className="fa fa-angle-up rp-rs-down-arrow"></i>
                                             }
                                             <div className='rp-icon-button'><i className="fa fa-leaf"></i></div>
-                                            <span className='rp-app-table-title'>Test Cases</span>
+                                        <span className='rp-app-table-title'>{this.props.title}</span>
+                                            {
+                                                this.state.loading && <span style={{ 'marginLeft': '2rem' }}>Please Wait for approx 3 mins to load complete table...</span>
+                                            }
+
                                             {
                                                 this.state.tcOpen &&
                                                 <div style={{ display: 'inline', position: 'absolute', marginTop: '0.5rem', right: '1.5rem' }}>
                                                     <span className='rp-app-table-value'>Selected: {this.state.selectedRows}</span>
-                                                    <span className='rp-app-table-value'>{`    Total: ${this.state.totalRows}`}</span>
-                                                    {/* <span className='rp-app-table-value'>{`    All Tcs: ${this.state.allRows}`}</span> */}
                                                 </div>
                                             }
 
 
                                         </div>
-                                        {/* {
-                                            this.state.rowSelect &&
-                                            <React.Fragment>
-                                                {
-                                                    this.props.user && this.state.isEditing ?
-                                                        <Fragment>
-                                                            <Button style={{ position: 'absolute', right: '1rem' }} title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.toggle()} >
-                                                                <i className="fa fa-check-square-o"></i>
-                                                            </Button>
-                                                            <Button style={{ position: 'absolute', right: '3rem' }} size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.reset()} >
-                                                                <i className="fa fa-undo"></i>
-                                                            </Button>
-                                                        </Fragment>
-                                                        :
-                                                        <Button style={{ position: 'absolute', right: '1rem' }} size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.setState({ isEditing: true })} >
-                                                            <i className="fa fa-pencil-square-o"></i>
-                                                        </Button>
-                                                }
-                                            </React.Fragment>
-                                        } */}
-
                                     </div>
                                 </div>
 
@@ -883,7 +835,7 @@ class TestCasesAll extends Component {
 
                                             {
                                                 this.props.data &&
-                                                <div class="col-md-2">
+                                                <div style={{width: '9rem',marginLeft:'1.5rem'}}>
                                                     <Input disabled={this.state.isApiUnderProgress} style={{ fontSize: '12px' }} value={this.state.domain} onChange={(e) => this.onSelectDomain(e.target.value)} type="select" name="selectDomain" id="selectDomain">
                                                         <option value=''>Select Domain</option>
                                                         {
@@ -894,7 +846,7 @@ class TestCasesAll extends Component {
                                             }
                                             {
                                                 this.props.data &&
-                                                <div class="col-md-2">
+                                                <div style={{width: '9rem',marginLeft:'0.5rem'}}>
                                                     <Input disabled={this.state.isApiUnderProgress} style={{ fontSize: '12px' }} value={this.state.subDomain} onChange={(e) => this.onSelectSubDomain(e.target.value)} type="select" name="subDomains" id="subDomains">
                                                         <option value=''>Select SubDomain</option>
                                                         {
@@ -905,7 +857,7 @@ class TestCasesAll extends Component {
                                             }
                                             {
                                                 this.props.data &&
-                                                <div class="col-md-2">
+                                                <div style={{width: '9rem',marginLeft:'0.5rem'}}>
                                                     <Input disabled={this.state.isApiUnderProgress} style={{ fontSize: '12px' }} value={this.state.CardType} onChange={(e) => this.onSelectCardType(e.target.value)} type="select" name="selectCardType" id="selectCardType">
                                                         <option value=''>Select Card Type</option>
                                                         {
@@ -914,13 +866,28 @@ class TestCasesAll extends Component {
                                                     </Input>
                                                 </div>
                                             }
-                                            <div class="col-md-2">
+                                            {
+                                                this.props.data &&
+                                                <div style={{width: '8rem',marginLeft:'0.5rem'}}>
+                                                    <Input disabled={this.state.isApiUnderProgress} style={{ fontSize: '12px' }} value={this.state.Priority} onChange={(e) => this.onSelectPriority(e.target.value)} type="select" name="selectPriority" id="selectPriority">
+                                                        <option value=''>Select Priority</option>
+
+                                                        {
+                                                            ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Skip', 'NA'].map(item => <option value={item}>{item}</option>)
+                                                        }
+                                                    </Input>
+                                                </div>
+                                            }
+                                            <div style={{width: '5rem' ,marginLeft:'0.5rem'}}>
                                                 <Input disabled={this.state.isApiUnderProgress} style={{ fontSize: '12px' }} type="text" id="filter-text-box" placeholder="Search..." onChange={(e) => this.onFilterTextBoxChanged(e.target.value)} />
+                                            </div>
+                                            <div style={{ width: '3rem', marginLeft: '0.5rem' }}>
+                                                <Button disabled={this.state.isApiUnderProgress} id="getall" onClick={() => this.getAlltcs()} type="button">All</Button>
                                             </div>
                                             {
                                                 this.props.user &&
 
-                                                <div class="col-md-3">
+                                                <div style={{width: '8rem',marginLeft:'0.5rem'}}>
                                                     <span>
                                                         <Button disabled={this.state.isApiUnderProgress} id="PopoverAssign" type="button">Apply Multiple</Button>
 
@@ -941,26 +908,15 @@ class TestCasesAll extends Component {
 
                                                                                     this.onCellEditing(item, 'Priority', e.target.value)
                                                                                     item.Priority = e.target.value;
-                                                                                    // let ws = e.target.value && e.target.value !== 'ADMIN'? 'MANUAL_ASSIGNED' : 'UNASSIGNED';
-                                                                                    // this.onCellEditing(item, ['Assignee', 'WorkingStatus'], [
-                                                                                    //     e.target.value,
-                                                                                    //     ws
-                                                                                    // ])
-                                                                                    // item.Assignee = e.target.value;
-                                                                                    // item.WorkingStatus = ws;
                                                                                 })
                                                                             }
                                                                             this.setState({ multi: { ...this.state.multi, [each.labels]: e.target.value } })
-                                                                            setTimeout(this.gridApi.refreshView(), 0);
+                                                                            setTimeout(this.gridApi.redrawRows(), 0);
                                                                         }} type="select" id={`select_${each.labels}`}>
                                                                             <option value=''>Select Priority</option>
                                                                             {
                                                                                 ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Skip', 'NA'].map(item => <option value={item}>{item}</option>)
                                                                             }
-                                                                            {/* <option value='ADMIN'>ADMIN</option>
-                                                                        {
-                                                                            this.props.users && this.props.users.map(item => <option value={item.email}>{item.email}</option>)
-                                                                        } */}
                                                                         </Input>
                                                                     </FormGroup>)
                                                                 }
@@ -979,21 +935,11 @@ class TestCasesAll extends Component {
 
                                                                                     this.onCellEditing(item, 'Assignee', e.target.value)
                                                                                     item.Assignee = e.target.value;
-                                                                                    // let ws = e.target.value && e.target.value !== 'ADMIN'? 'MANUAL_ASSIGNED' : 'UNASSIGNED';
-                                                                                    // this.onCellEditing(item, ['Assignee', 'WorkingStatus'], [
-                                                                                    //     e.target.value,
-                                                                                    //     ws
-                                                                                    // ])
-                                                                                    // item.Assignee = e.target.value;
-                                                                                    // item.WorkingStatus = ws;
                                                                                 })
                                                                             }
                                                                             this.setState({ multi: { ...this.state.multi, [each.labels]: e.target.value } })
-                                                                            setTimeout(this.gridApi.refreshView(), 0);
+                                                                            setTimeout(this.gridApi.redrawRows(), 0);
                                                                         }} type="select" id={`select_assignee${each.labels}`}>
-                                                                            {/* {
-                                                                            ['P0','P1','P2','P3','P4','P5','P6','P7','P8','P9'].map(item => <option value={item}>{item}</option>)
-                                                                        } */}
                                                                             <option value=''>Select Assignee</option>
                                                                             {
                                                                                 this.props.users.map(item => <option value={item}>{item}</option>)
@@ -1013,61 +959,58 @@ class TestCasesAll extends Component {
                                                                             let selectedRows = this.gridApi.getSelectedRows();
                                                                             if (e.target.value && e.target.value !== '') {
                                                                                 selectedRows.forEach(item => {
-
-                                                                                    this.onCellEditing(item, 'WorkingStatus', e.target.value)
+                                                                                   this.onCellEditing(item, 'WorkingStatus', e.target.value)
                                                                                     item.WorkingStatus = e.target.value;
-                                                                                    // let ws = e.target.value && e.target.value !== 'ADMIN'? 'MANUAL_ASSIGNED' : 'UNASSIGNED';
-                                                                                    // this.onCellEditing(item, ['Assignee', 'WorkingStatus'], [
-                                                                                    //     e.target.value,
-                                                                                    //     ws
-                                                                                    // ])
-                                                                                    // item.Assignee = e.target.value;
-                                                                                    // item.WorkingStatus = ws;
                                                                                 })
                                                                             }
                                                                             this.setState({ multi: { ...this.state.multi, [each.labels]: e.target.value } })
-                                                                            setTimeout(this.gridApi.refreshView(), 0);
+                                                                            setTimeout(this.gridApi.redrawRows(), 0);
                                                                         }} type="select" id={`select_WS${each.labels}`}>
                                                                             <option value=''>Select Working Status</option>
                                                                             {
-                                                                                ['CREATED', 'UNASSIGNED', 'DEV_ASSIGNED', 'DEV_APPROVED', 'APPROVED', 'UNAPPROVED', 'MANUAL_ASSIGNED', 'MANUAL_COMPLETED',
-                                                                                    'AUTO_ASSIGNED', 'AUTO_COMPLETED', 'DELETED'
-                                                                                ]
-                                                                                    .map(item => <option value={item}>{item}</option>)
+                                                                              workingStatuses.map(item => <option value={item}>{item}</option>)
                                                                             }
 
 
                                                                         </Input>
                                                                     </FormGroup>)
                                                                 }
+                                                    <div style={{float: 'right' ,marginBottom: '0.5rem'}}>
+                                                                      
+                                                        <span>
+                                                            {
+                                                                this.isAnyChanged &&
+                                                                <Button disabled={this.state.isApiUnderProgress} title="Undo" size="md"  className="rp-rb-save-btn" onClick={() => this.undo()} >
+                                                                    {/* <i className="fa fa-undo"></i> */} Undo
+                                                                </Button>
+                                                            }
+                                                        </span>
+                                                        <span>
+                                                            {
+                                                                this.isAnyChanged &&
+                                                                <Button disabled={this.state.isApiUnderProgress} title="Save" size="md"  className="rp-rb-save-btn" onClick={() => this.toggleAll()} >
+                                                                    {/* <i className="fa fa-save"></i> */} Save
+                                                                </Button>
+                                                            }
+                                                        </span>
+                                                    </div>
 
 
                                                             </PopoverBody>
                                                         </UncontrolledPopover>
                                                     </span>
-
-                                                    <span>
-                                                        {
-                                                            this.isAnyChanged &&
-                                                            <Button disabled={this.state.isApiUnderProgress} title="Undo" size="md" color="transparent" className="rp-rb-save-btn" onClick={() => this.undo()} >
-                                                                <i className="fa fa-undo"></i>
-                                                            </Button>
-                                                        }
-                                                    </span>
-                                                    <span>
-                                                        {
-                                                            this.isAnyChanged &&
-                                                            <Button disabled={this.state.isApiUnderProgress} title="Save" size="md" color="transparent" className="rp-rb-save-btn" onClick={() => this.saveAll()} >
-                                                                <i className="fa fa-check-square-o"></i>
-                                                            </Button>
-                                                        }
-                                                    </span>
-
-
-
-
+                                                
                                                 </div>
                                             }
+                                            <div style={{width: '6rem',marginLeft:'0.5rem'}}>
+                                            <Button disabled={this.state.isApiUnderProgress} title="CSV" size="md"  className="rp-rb-save-btn" onClick={() => {
+                                                if(this.gridApi) {
+                                                    this.gridApi.exportDataAsCsv();
+                                                }
+                                            }} >
+                                                                    {/* <i className="fa fa-save"></i> */} Download
+                                                                </Button>
+                                            </div>
 
 
                                         </div>
@@ -1082,8 +1025,6 @@ class TestCasesAll extends Component {
                                             className="ag-theme-balham"
                                         >
                                             <AgGridReact
-                                                pagination={true}
-                                                // deltaRowDataMode={true}
                                                 suppressScrollOnNewData={true}
                                                 onSelectionChanged={(e) => this.onSelectionChanged(e)}
                                                 rowStyle={{ alignItems: 'top' }}
@@ -1120,13 +1061,26 @@ class TestCasesAll extends Component {
                                             </div>
                                         } */}
                                     </div>
-                                    {/* <div style={{ float: 'right', display: this.state.isApiUnderProgress || this.state.CardType || this.state.domain || this.state.subDomain ? 'none' : '' }}>
+                                    <div style={{display: 'inline'}}>
+                                        <div style={{display: 'inline'}}>
+                                        <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>Pass: {pass}</span>
+                                        <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>Fail: {fail}</span>
+                                        {/* <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>Automated: {automated}</span> */}
+                                        <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>Total: {total}</span>
+                                        </div>
+                                    <div style={{
+                                        float: 'right', display: this.state.isApiUnderProgress || this.state.CardType || this.state.domain || this.state.subDomain ||
+                                            (this.props.tcStrategy && this.gridApi && this.props.tcStrategy.totalTests === this.gridApi.getModel().rowsToDisplay.length)
+                                            ? 'none' : ''
+                                    }}>
                                         <Button onClick={() => this.paginate(-1)}>Previous</Button>
                                         <span  >{`   Page: ${this.pageNumber}   `}</span>
 
                                         <Button onClick={() => this.paginate(1)}>Next</Button>
 
-                                    </div> */}
+                                    </div>
+                                    </div>
+                                    
 
 
                                 </div>
@@ -1141,7 +1095,7 @@ class TestCasesAll extends Component {
                                                 this.state.isEditing ?
                                                     <Fragment>
                                                         <Button title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmToggle()} >
-                                                            <i className="fa fa-check-square-o"></i>
+                                                            <i className="fa fa-save"></i>
                                                         </Button>
                                                         <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.reset()} >
                                                             <i className="fa fa-undo"></i>
@@ -1174,7 +1128,7 @@ class TestCasesAll extends Component {
                                                                     fontWeight: '500'
 
                                                                 }} class="text-muted">TC ID</small><br></br>
-                                                                <strong class="h5">{this.props.tcDetails.TcID}</strong>
+                                                                <strong style={{wordWrap: 'break-word'}} class="h5">{this.props.tcDetails.TcID}</strong>
                                                             </div>
                                                         </div>
                                                         {
@@ -1425,53 +1379,11 @@ class TestCasesAll extends Component {
                             this.state.toggleMessage ? this.state.toggleMessage : `Are you sure you want to make the changes?`
                         }
                         {
-                            !this.state.toggleMessage && this.props.testcaseEdit.original &&
+                            !this.state.toggleMessage &&
                             < React.Fragment >
                                 <Row>
                                     <Col xs="11" md="11" lg="11">
-                                        <div>Original</div>
-                                        <div style={{ width: '450px', height: '150px', marginBottom: '3rem' }}>
-                                            <div style={{ width: "100%", height: "100%" }}>
-                                                <div
-                                                    id="e2eGrid"
-                                                    style={{
-                                                        height: "100%",
-                                                        width: "100%",
-                                                    }}
-                                                    className="ag-theme-balham"
-                                                >
-                                                    <AgGridReact
-                                                        modules={this.state.modules}
-                                                        columnDefs={this.state.editColumnDefs}
-                                                        defaultColDef={this.state.defaultColDef}
-                                                        rowData={[this.props.testcaseEdit.original]}
-
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Col>
-                                    <Col xs="11" md="11" lg="11">
-                                        <div>Updated</div>
-                                        <div style={{ width: '450px', height: '150px', marginBottom: '3rem' }}>
-                                            <div style={{ width: "100%", height: "100%" }}>
-                                                <div
-                                                    id="e2eGrid"
-                                                    style={{
-                                                        height: "100%",
-                                                        width: "100%",
-                                                    }}
-                                                    className="ag-theme-balham"
-                                                >
-                                                    <AgGridReact
-                                                        modules={this.state.modules}
-                                                        columnDefs={this.state.editColumnDefs}
-                                                        defaultColDef={this.state.defaultColDef}
-                                                        rowData={[this.props.testcaseEdit]}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </Col>
                                 </Row>
                             </React.Fragment>
@@ -1504,6 +1416,25 @@ class TestCasesAll extends Component {
                         }
                     </ModalFooter>
                 </Modal>
+                <Modal isOpen={this.state.multipleChanges} toggle={() => this.toggleAll()}>
+                    {
+                        <ModalHeader toggle={() => this.toggleAll()}>{
+                            'Confirmation'
+                        }</ModalHeader>
+                    }
+                    <ModalBody>
+                        {
+                            `Are you sure you want to update multiple changes ?`
+                        }
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={() => { this.saveAll(); this.toggleAll(); }}>Ok</Button>{' '}
+                        {
+                            <Button color="secondary" onClick={() => this.toggleAll()}>Cancel</Button>
+                        }
+                    </ModalFooter>
+                </Modal>
             </div >
 
         )
@@ -1514,12 +1445,12 @@ const mapStateToProps = (state, ownProps) => ({
     user: state.auth.currentUser,
     users: state.user.users.map(item => item.email),
     selectedRelease: getCurrentRelease(state, state.release.current.id),
-    tcStrategy: getTCForStrategy(state, state.release.current.id),
     data: state.testcase.all[state.release.current.id],
     tcDetails: state.testcase.testcaseDetail,
+    tcStrategy: getTCForStrategy(state, state.release.current.id),
     testcaseEdit: state.testcase.testcaseEdit
 })
-export default connect(mapStateToProps, { saveTestCase, getCurrentRelease, saveSingleTestCase, updateTCEdit })(TestCasesAll);
+export default connect(mapStateToProps, { saveTestCase, getCurrentRelease, saveSingleTestCase, updateTCEdit, saveReleaseBasicInfo })(TestCasesAll);
 
 
 
@@ -1566,7 +1497,8 @@ export default connect(mapStateToProps, { saveTestCase, getCurrentRelease, saveS
                 //     }
                 // },
                 // {
-                //     headerName: "Price", field: "price", sortable: true, filter: 'agNumberColumnFilter', valueParser: this.numberParser,
+                //     headerName: "Price", field: "price", sortable: true, valueParser: this.numberParser,
                 //     cellStyle: this.renderEditedCell, editable: true,
-                //     cellEditor: 'numericEditor'
+                //     cellEditor: 'numericEditor',
+                // filter: 'agNumberColumnFilter', 
                 // }

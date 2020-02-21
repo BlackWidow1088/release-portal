@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Badge, Card, CardBody, CardHeader, Col, Pagination, PaginationItem, PaginationLink, Row, Table, Button, Input, Collapse
-    , Modal, ModalHeader, ModalBody, ModalFooter, Progress, Popover, PopoverBody, FormGroup, Label
+    , Modal, ModalHeader, ModalBody, ModalFooter, Progress, Popover, PopoverBody, FormGroup, Label, TabContent, TabPane, Nav, NavItem, NavLink,
 } from 'reactstrap';
 import { connect } from 'react-redux';
 import { getCurrentRelease } from '../../../reducers/release.reducer';
@@ -17,6 +17,8 @@ import { AgGridReact } from 'ag-grid-react';
 import axios from 'axios';
 import { saveTestCase, saveTestCaseStatus, saveSingleTestCase } from '../../../actions';
 import Multiselect from 'react-bootstrap-multiselect';
+import CreateMultiple from './CreateMultiple';
+import classnames from 'classnames';
 const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
 class CreateTCs extends Component {
     // [field] : {old,new}
@@ -28,11 +30,16 @@ class CreateTCs extends Component {
             open: false,
             width: window.screen.availWidth > 1700 ? 500 : 380,
             edited: {},
-            errors: {}
+            errors: {},
+            multipleErrors: {'mesg':'hi'},
+            activeTab: '1',
         }
     }
     toggle = () => this.setState({ modal: !this.state.modal });
 
+    toggleTab = tab => {
+        if (this.state.activeTab !== tab) this.setState({ activeTab: tab });
+    }
 
     textFields = [
         'Domain', 'SubDomain',
@@ -66,7 +73,7 @@ class CreateTCs extends Component {
             array = [];
         }
         if (array && !Array.isArray(array)) {
-            array = array.split(',');
+            array = `${array}`.split(',');
         }
         return array;
     }
@@ -87,7 +94,6 @@ class CreateTCs extends Component {
             "RequestType": 'POST',
             "URL": `/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`
         };
-
 
         axios.post(`/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`, { ...data })
             .then(res => {
@@ -240,9 +246,6 @@ class CreateTCs extends Component {
                                                 <div className='rp-icon-button'><i className="fa fa-plus-circle"></i></div>
                                                 <span className='rp-app-table-title'>Create Test Case</span>
                                             </div>
-                                            <Button style={{ position: 'absolute', right: '1rem' }} title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmToggle()} >
-                                                <i className="fa fa-save"></i>
-                                            </Button>
                                         </div>
 
 
@@ -256,7 +259,35 @@ class CreateTCs extends Component {
 
                             </div>
                             <Collapse isOpen={this.state.createTc}>
-                                <FormGroup row className="my-0" style={{ marginTop: '1rem' }}>
+                            <Nav tabs>
+                            <NavItem>
+                                <NavLink
+                                    className={classnames({ active: this.state.activeTab === '1' })}
+                                    onClick={() => this.toggleTab('1')}>
+                                    Multiple
+                                </NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink
+                                    className={classnames({ active: this.state.activeTab === '2' })}
+                                    onClick={() => this.toggleTab('2')}
+                                >
+                                    Single
+                                </NavLink>
+                            </NavItem>
+                            </Nav>
+                            <TabContent activeTab={this.state.activeTab}>
+                            <TabPane tabId="1">
+                                <CreateMultiple saveAll={(data) => {
+                                    this.setState({addMultiple: data});
+                                    this.multipleToggle();
+                                    }}></CreateMultiple>
+                            </TabPane>
+                            <TabPane tabId="2">
+                            <Button style={{ position: 'absolute', right: '1rem' }} title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmToggle()} >
+                                                <i className="fa fa-save"></i>
+                            </Button>
+                            <FormGroup row className="my-0" style={{ marginTop: '1rem' }}>
                                     <Col xs="6" md="3" lg="3">
                                         <FormGroup className='rp-app-table-value'>
                                             <Label className='rp-app-table-label' htmlFor="Domain">
@@ -448,6 +479,9 @@ class CreateTCs extends Component {
                                         }
                                     </FormGroup>
                                 }
+                            </TabPane>
+                        </TabContent>
+
                             </Collapse>
                         </Col>
                     </Row>
