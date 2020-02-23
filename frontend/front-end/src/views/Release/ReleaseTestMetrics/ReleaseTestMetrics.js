@@ -64,7 +64,6 @@ class ReleaseTestMetrics extends Component {
         if (!this.props.currentUser) {
             this.setState({ metricsOpen: true })
         }
-
     }
     toggle = () => this.setState({ modal: !this.state.modal });
     confirmToggle() {
@@ -143,7 +142,7 @@ class ReleaseTestMetrics extends Component {
         let op = this.props.selectedRelease.OrchestrationPlatform ? this.props.selectedRelease.OrchestrationPlatform.map(item => ({ value: item })) : [];
         return (
             <div>
-                <TestCases title={'Test Cases'} type='all'></TestCases>
+                <TestCasesAll title={'Test Cases'} type='all'></TestCasesAll>
                 {/* <TestCasesAll title={tcTypes.PFAPPROVAL.title} type={tcTypes.PFAPPROVAL.type}></TestCasesAll>
                 <TestCasesAll title={tcTypes.PFASSIGN.title} type={tcTypes.PFASSIGN.type}></TestCasesAll>
                 <TestCasesAll title={tcTypes.ASSIGNAUTO.title} type={tcTypes.ASSIGNAUTO.type}></TestCasesAll>

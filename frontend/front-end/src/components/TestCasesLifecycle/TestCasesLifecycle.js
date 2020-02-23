@@ -35,7 +35,7 @@ import TcSummary from './TcSummary';
 
 // import { data, domains, subDomains } from './constants';
 // "Description": "Enable helm", "ExpectedBehaviour": "dctl feature list should display helm as enabled", "Notes": "NOTES NOT PROVIDED"
-class TestCasesAll extends Component {
+class TestCasesv1 extends Component {
     cntr = 0;
     pageNumber = 0;
     rows = 15;
@@ -1197,4 +1197,4 @@ const mapStateToProps = (state, ownProps) => ({
     tcStrategy: getTCForStrategy(state, state.release.current.id),
     testcaseEdit: state.testcase.testcaseEdit
 })
-export default connect(mapStateToProps, { saveTestCase, getCurrentRelease, saveSingleTestCase, updateTCEdit, saveReleaseBasicInfo })(TestCasesAll);
+export default connect(mapStateToProps, { saveTestCase, getCurrentRelease, saveSingleTestCase, updateTCEdit, saveReleaseBasicInfo })(TestCasesv1);

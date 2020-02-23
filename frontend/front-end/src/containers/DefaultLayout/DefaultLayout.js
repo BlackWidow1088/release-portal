@@ -51,8 +51,8 @@ const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 class DefaultLayout extends Component {
   GoogleAuth;
   auth2;
-  SCOPE = 'https://www.googleapis.com/auth/drive.metadata.readonly';
-  // SCOPE = 'profile';
+  // SCOPE = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+  SCOPE = 'profile';
   userNotificationsInterval = null;
   userEmail = null;
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
@@ -72,14 +72,16 @@ class DefaultLayout extends Component {
       .catch(err => { })
   }
   setSigninStatus(isSignedIn) {
-    this.GoogleAuth = gapi.auth2.getAuthInstance();
-    let user = this.GoogleAuth.currentUser.get();
-    let isAuthorized = user.hasGrantedScopes(this.SCOPE);
-    console.log('got user ', user)
-    if (isAuthorized) {
-      this.loginBackend(user)
-    } else {
-      console.log('un authorized')
+    // this.GoogleAuth = gapi.auth2.getAuthInstance();
+    if (this.GoogleAuth) {
+      let user = this.GoogleAuth.currentUser.get();
+      let isAuthorized = user.hasGrantedScopes(this.SCOPE);
+      console.log('got user ', user)
+      if (isAuthorized) {
+        this.loginBackend(user)
+      } else {
+        console.log('un authorized')
+      }
     }
   }
   signOut(e) {
@@ -90,9 +92,12 @@ class DefaultLayout extends Component {
     if (this.props.currentUser) {
       this.props.clearUserData();
       // this.props.history.push('/login')
-      this.GoogleAuth.signOut().then(() => {
-        this.props.history.push('/login')
-      })
+      if (this.GoogleAuth) {
+        this.GoogleAuth.signOut().then(() => {
+          this.props.history.push('/login')
+        })
+      }
+
     } else {
       this.props.history.push('/login');
     }
@@ -101,11 +106,6 @@ class DefaultLayout extends Component {
     this.GoogleAuth.disconnect();
   }
 
-  // updateSigninStatus(isSignedIn) {
-  //   console.log('creds');
-  //   console.log(isSignedIn);
-  //   this.setSigninStatus();
-  // }
   isUserSignedIn() {
     return this.GoogleAuth ? this.GoogleAuth.isSignedIn.get() : false;
   }
@@ -130,7 +130,7 @@ class DefaultLayout extends Component {
       }).then(() => {
         // Listen for sign-in state changes.
         // this.GoogleAuth.isSignedIn.listen((data) => this.updateSigninStatus(data));
-          
+        this.GoogleAuth = gapi.auth2.getAuthInstance();
         // Handle initial sign-in state. (Determine if user is already signed in.)
         this.setSigninStatus();
       }).catch(err => { console.log('cannot get details') });
