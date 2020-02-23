@@ -31,18 +31,20 @@ class Login extends Component {
         this.props.history.push('/');
       })
       .catch(err => {
+        alert('login failed')
         console.log('post error')
       })
   }
   onLoginFailed = (err) => {
-    alert('failed to login ')
     console.log('login failed ', err)
   }
   //a1xGwnaKFGC2A55Cy72bxMq1
   componentDidMount() {
     window.gapi.load('auth2', () => {
-      this.GoogleAuth = gapi.auth2.getAuthInstance();
-      this.setState({ googleAuthLoaded: true })
+
+
+
+      // this.GoogleAuth.isSignedIn.listen((data) => this.setSigninStatus(data));
       this.auth2 = gapi.auth2.init({
         // 'apiKey': 'AIzaSyCswiq9I_E8n2bgQ5IYZhb7jQvERX8pUJs',
         'apiKey': 'AIzaSyAxV1LfUI_TIjiQ2b8rW0fVYdMwHPeKQTYY',
@@ -52,6 +54,8 @@ class Login extends Component {
         'scope': this.SCOPE,
         'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
       }).then(() => {
+        this.GoogleAuth = gapi.auth2.getAuthInstance();
+        this.setState({ googleAuthLoaded: true })
         this.setSigninStatus();
       });
     });
