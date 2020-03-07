@@ -58,6 +58,8 @@ class ExcelReader extends Component {
     return (
       <div>
         <input type="file" id="file" accept={SheetJSFT} onChange={this.handleChange} />
+        {/* <Link to="/files/myfile.pdf" target="_blank" download>Download Format</Link> */}
+        <a href='/assets/create_tc_format.xls' download>Download TC Format</a>
         <br />
         {/* <input type='submit' 
           value="Process Triggers"

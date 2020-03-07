@@ -30,7 +30,7 @@ class CreateResult extends Component {
 
 
     textFields = [
-        'Build', 'Result', 'Notes', 'E2EFocus', 'NoOfTCsPassed', 'Bug', 'Type', 'NoOfIteration', 'CfgFileUsed', 'LinkFlap', 'NoOfDuration',
+        'Build', 'Result', 'Notes', 'E2EFocus','E2ESkipList', 'NoOfTCsPassed', 'Bug', 'Type', 'NoOfIteration', 'CfgFileUsed', 'LinkFlap', 'NoOfDuration',
         'Tag', 'Setup', 'Date', 'Jenkin'
     ];
     arrayFields = ['CardType']
@@ -205,7 +205,7 @@ class CreateResult extends Component {
                     <FormGroup check inline>
                         <Input className="form-check-input" type="checkbox" id="inline-checkbox1" name="inline-checkbox1" onChange={(e) => {
                             console.log(e.target.checked)
-                            this.setState({ addTC: { ...this.state.addTC, Jenkin: e.target.value }, errors: { ...this.state.errors, Jenkin: null } })} }
+                            this.setState({ addTC: { ...this.state.addTC, Jenkin: e.target.checked }, errors: { ...this.state.errors, Jenkin: null } })} }
                         value={this.state.addTC && this.state.addTC.Jenkin} />
                         <Label className="form-check-label" htmlFor="inline-checkbox1">Is Jenkins Build?</Label>
                       </FormGroup>
@@ -433,6 +433,7 @@ class CreateResult extends Component {
                     <FormGroup row className="my-0" style={{ marginTop: '1rem' }}>
                         {
                             [
+                                { field: 'E2ESkipList', header: 'E2ESkipList', type: 'text', SanityType: 'E2E' },
                                 { field: 'E2EFocus', header: 'E2EFocus', type: 'text', SanityType: 'E2E' },
                                 { field: 'Notes', header: 'Notes', type: 'text', SanityType: this.state.addTC.Type },
                             ].map((item, index) => (

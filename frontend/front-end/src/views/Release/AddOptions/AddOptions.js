@@ -36,8 +36,7 @@ class AddOptions extends Component {
         let selected = {
             domains: this.state.addedDomains ? this.state.addedDomains : [], 
             selectedDomain: this.state.selectedDomain ? this.state.selectedDomain : null,
-            subdomains: this.state.subDomains ? this.state.subDomains : [],
-            cards: this.state.cards ? this.state.cards:[]
+            subdomains: this.state.addedSubDomains ? this.state.addedSubDomains : [],
         }
         let data = {
             Activity: {
@@ -265,7 +264,7 @@ class AddOptions extends Component {
                                 }
                             </FormGroup>
                         </Col> */}
-                        <Col xs="6" md="4" lg="3">
+                        {/* <Col xs="6" md="4" lg="3">
                         {
                                 this.state.addedCards && this.state.addedCards.map((item, index) => {
                                     return (
@@ -300,7 +299,7 @@ class AddOptions extends Component {
                                 }}>Add CardType</Button></div>
 
 
-                        </Col>
+                        </Col> */}
                         {/* <Col xs="6" md="4" lg="3">
                             <FormGroup className='rp-app-table-value'>
                                 <Label className='rp-app-table-label' htmlFor="Server">

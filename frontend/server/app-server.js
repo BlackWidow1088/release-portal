@@ -8,6 +8,8 @@ let releases = jsonfile.readFileSync('./releases.json');
 let assignedTCs = jsonfile.readFileSync('./currentAssigned.json');
 let users = jsonfile.readFileSync('./users.json');
 let allTcs = jsonfile.readFileSync('./tcCompleteSort.json');
+let initTC = jsonfile.readFileSync('./initTC.json');
+let selectedTC = jsonfile.readFileSync('./initSelect.json');
 
 // assignedTCs['2.3.0'] = { "ADMIN": Object.keys(allTcs['2.3.0']) }
 let statusOptions = jsonfile.readFileSync('./constants.json');
@@ -328,7 +330,7 @@ app.use('/rest/features/:id', (req, res) => {
 //     }, err => { console.log('cannot get jira') });
 // }, err => { })
 app.use('/rest/bugs/total/:id', (req, res) => {
-    var totalBugsStr = `?jql=fixVersion%20in%20(${req.params.id})%20AND%20type%20in%20("Bug","Sub-task")&fields=key,status,priority,summary&maxResults=2000`
+    var totalBugsStr = `?jql=fixVersion%20in%20(${req.params.id})%20AND%20type%20in%20("Bug")&fields=key,status,priority,summary&maxResults=2000`
     var jiraReq = client.get(JIRA_URL + '/rest/api/2/search' + totalBugsStr, searchArgs, function (searchResultTotal, response) {
         if (response.statusCode === 401) {
             loginJIRA().then(function () {
@@ -347,7 +349,7 @@ app.use('/rest/bugs/total/:id', (req, res) => {
     })
 }, err => { });
 app.use('/rest/bugs/open/:id', (req, res) => {
-    var openBugsStr = `?jql=status%20in%20("Open","In Progress","To Do","Done")%20AND%20fixVersion%20in%20(${req.params.id})%20AND%20type%20in%20("Bug","Sub-task")%20AND%20(Component!=Automation%20OR%20Component=EMPTY)&fields=key,status,priority,summary&maxResults=2000`
+    var openBugsStr = `?jql=status%20in%20("Open","In Progress","To Do","Done")%20AND%20fixVersion%20in%20(${req.params.id})%20AND%20type%20in%20("Bug")%20AND%20(Component!=Automation%20OR%20Component=EMPTY)&fields=key,status,priority,summary&maxResults=2000`
     var jiraReq = client.get(JIRA_URL + '/rest/api/2/search' + openBugsStr, searchArgs, function (searchResultTotal, response) {
         if (response.statusCode === 401) {
             loginJIRA().then(function () {
@@ -863,6 +865,27 @@ app.put('/dummy/api/sanity/e2e/:release', (req, res) => {
     data = req.body
     res.status(200).send({})
 })
+app.get('/dummy/api/wholetcinfo/:release', (req, res) => {
+    res.status(200).send(initTC);
+})
+app.get('/dummy/api/tcinfo/:release/id/:tcid/card/:card', (req, res) => {
+    console.log(req.params)
+    initTC.forEach(each => {
+        if (each.CardType === req.params.card && each.TcID === req.params.tcid) {
+            console.log('found')
+            each.Activity = selectedTC.Activty;
+            each.StatusList = selectedTC.StatusList;
+            res.send({ ...selectedTC, ...each });
+        }
+    })
+    // res.send({});
+})
+app.post('/dummy/api/tcinfo/:release', (req, res) => {
+    console.log(req.body);
+    req.body.CardType = req.body.CardType[0];
+    initTC.push(req.body);
+    res.send({})
+})
 
 // FOR PRODUCTION: 
 // app.use('/', express.static('./build'));
@@ -881,6 +904,8 @@ var gracefulShutdown = function () {
     jsonfile.writeFileSync('./releases.json', releases);
     console.log('updated releases')
     jsonfile.writeFileSync('./tcCompleteSort.json', allTcs);
+    console.log('updated initTC')
+    jsonfile.writeFileSync('./initTC.json', initTC);
 
     // jsonfile.writeFileSync('./releases.json', updatedReleases);
     // jsonfile.writeFileSync('./tcCompleteSort.json', tcs);

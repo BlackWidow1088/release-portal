@@ -87,7 +87,7 @@ class ReleaseSanityResult extends Component {
         if (this.state.activeTab === '5') {
             this.setState({ deleteLongevityCntr: this.state.deleteLongevityCntr + 1 })
         }
-        this.confirmDeleteToggle();
+        // this.confirmDeleteToggle();
     }
     save = () => {
 
@@ -106,9 +106,10 @@ class ReleaseSanityResult extends Component {
             this.setState({ saveStressCntr: this.state.saveStressCntr + 1 })
         }
         if (this.state.activeTab === '5') {
+
             this.setState({ saveLongevityCntr: this.state.saveLongevityCntr + 1 })
         }
-        this.confirmSaveToggle();
+        // this.confirmSaveToggle();
     }
     confirmDelete = () => {
         this.confirmDeleteToggle();
@@ -141,6 +142,8 @@ class ReleaseSanityResult extends Component {
                                             } */}
                                             <div className='rp-icon-button'><i className="fa fa-leaf"></i></div>
                                             <span className='rp-app-table-title'>Other Test Result</span>
+                                            <span style={{ 'marginLeft': '2rem' }}>Please keep rows selected before making changes...</span>
+                                            
                                             {
                                                 this.props.currentUser && this.props.currentUser.email &&
                                                 <React.Fragment>
@@ -209,10 +212,10 @@ class ReleaseSanityResult extends Component {
                                 <E2ETestCases tag='WEEKLY' e2eCounter={this.state.E2EWeekly} deleteCounter={this.state.deleteE2EWeeklyCntr} saveCounter={this.state.saveE2EWeeklyCntr}></E2ETestCases>
                             </TabPane>
                             <TabPane tabId="4">
-                                <StressTestCases e2eCounter={this.state.Stress} deleteCounter={this.state.deleteStressCntr} saveCounter={this.state.saveE2EStressCntr}></StressTestCases>
+                                <StressTestCases e2eCounter={this.state.Stress} deleteCounter={this.state.deleteStressCntr} saveCounter={this.state.saveStressCntr}></StressTestCases>
                             </TabPane>
                             <TabPane tabId="5">
-                                <LongevityTestCases e2eCounter={this.state.Longevity} deleteCounter={this.state.deleteLongevityCntr} saveCounter={this.state.saveE2ELongevityCntr}></LongevityTestCases>
+                                <LongevityTestCases e2eCounter={this.state.Longevity} deleteCounter={this.state.deleteLongevityCntr} saveCounter={this.state.saveLongevityCntr}></LongevityTestCases>
                             </TabPane>
                         </TabContent>
                     </Col>
@@ -247,7 +250,7 @@ class ReleaseSanityResult extends Component {
                         Are you sure you want to make the delete the results?
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => this.delete()}>Delete</Button>{' '}
+                        <Button color="primary" onClick={() => { this.confirmDeleteToggle(); setTimeout(() => this.delete(), 1)}}>Delete</Button>{' '}
                         {
                             <Button color="secondary" onClick={() => this.confirmDeleteToggle()}>Cancel</Button>
                         }
@@ -263,7 +266,7 @@ class ReleaseSanityResult extends Component {
                         Are you sure you want to save the results?
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => this.save()}>Save</Button>{' '}
+                        <Button color="primary" onClick={() => { this.confirmSaveToggle(); setTimeout(() => this.save(), 1)}}>Save</Button>{' '}
                         {
                             <Button color="secondary" onClick={() => this.confirmSaveToggle()}>Cancel</Button>
                         }

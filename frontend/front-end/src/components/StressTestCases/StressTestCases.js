@@ -116,12 +116,13 @@ class StressTestCases extends Component {
                     editable: true,
                     cellEditor: "datePicker",
                     filter: 'agDateColumnFilter',
-                    width: 180
+                    width: 120
                 },
                 {
                     headerName: "Setup Type", field: "Setup", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     editable: true,
                     cellEditor: 'selectionEditor',
+                    width:100
                 },
                 {
                     headerName: "Iterations", field: "NoOfIteration", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
@@ -129,25 +130,34 @@ class StressTestCases extends Component {
                     cellEditor: 'numericEditor',
                     filter: 'agNumberColumnFilter',
                     editable: true,
+                    width:100
                 },
                 {
-                    headerName: "Build", field: "Build", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-
+                    headerName: "Build", field: "Build", 
+                    editable: true, 
+                    sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                    width:100
                 },
                 {
-                    headerName: "Result", field: "Result", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                    headerName: "Result", field: "Result", 
+                    editable: true, 
+                    sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['Select Result', 'Fail', 'Pass']
-                    }
+                    },
+                    width:100
                 },
                 {
-                    headerName: "Bug", field: "Bug", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
+                    headerName: "Bug", field: "Bug",
+                     editable: true, 
+                     sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
                 },
                 {
                     headerName: "CfgFileUsed", field: "CfgFileUsed", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
                     cellClass: 'cell-wrap-text',
                     editable: true,
+                    width:150
                 },
 
 
@@ -159,6 +169,7 @@ class StressTestCases extends Component {
                         values: ['Select Link-Flap', 'Yes', 'No']
                     },
                     editable: true,
+                    width:80
                 },
 
                 {
@@ -168,7 +179,8 @@ class StressTestCases extends Component {
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: this.props.users
-                    }
+                    },
+                    width:150
                 },
                 {
                     headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell,
@@ -176,7 +188,8 @@ class StressTestCases extends Component {
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['Select Card', 'BOS', 'NYNJ', 'COMMON', 'SOFTWARE']
-                    }
+                    },
+                    width:100
 
                 },
                 {
@@ -285,13 +298,24 @@ class StressTestCases extends Component {
         if (!this.gridApi) {
             return;
         }
-        let items = this.gridApi.getSelectedRows();
+        let items = [...this.gridApi.getSelectedRows()];
         if (items.length <= 0) {
             alert('Please select atleast one stress sanity to save');
             return;
         }
-        items = items.map(each => ({
-            ...each,
+        let sendingItems = items.map(each => ({
+            id: each.id,
+            Date: each.Date,
+            Setup: each.Setup,
+            Result:each.Result,
+            Build: each.Build,
+            Bug: each.Bug,
+            NoOfIteration: each.NoOfIteration,
+            CfgFileUsed: each.CfgFileUsed,
+            User:each.User,
+            CardType:each.CardType,
+            Notes:each.Notes, 
+            LinkFlap: each.LinkFlap,
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -305,7 +329,7 @@ class StressTestCases extends Component {
 
         this.gridOperations(false);
         let url = `/api/sanity/stressUpdate/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.post(url, [...items])
+        axios.post(url, sendingItems)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -328,13 +352,23 @@ class StressTestCases extends Component {
         if (!this.gridApi) {
             return;
         }
-        let items = this.gridApi.getSelectedRows();
+        let items = [...this.gridApi.getSelectedRows()];
         if (items.length <= 0) {
             alert('Please select atleast one stress sanity to delete');
             return;
         }
-        items = items.map(each => ({
-            ...each,
+        let sendingItems = items.map(each => ({
+            id: each.id,
+            Date: each.Date,
+            Setup: each.Setup,
+            Result:each.Result,
+            Bug: each.Bug,
+            NoOfIteration: each.NoOfIteration,
+            CfgFileUsed: each.CfgFileUsed,
+            User:each.User,
+            CardType:each.CardType,
+            Notes:each.Notes, 
+            LinkFlap: each.LinkFlap,
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -348,7 +382,7 @@ class StressTestCases extends Component {
 
         this.gridOperations(false);
         let url = `/api/sanity/stressDelete/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.post(url, [...items])
+        axios.post(url, sendingItems)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -369,6 +403,7 @@ class StressTestCases extends Component {
         this.setState({ selectedRows: event.api.getSelectedRows().length })
     }
     deselect(updateTotalRows) {
+        this.editedRows = {};
         if (this.gridApi) {
             this.gridApi.deselectAll();
         }
@@ -388,10 +423,11 @@ class StressTestCases extends Component {
                 backgroundColor: 'rgb(209, 255, 82)',
                 borderStyle: 'solid',
                 borderWidth: '1px',
-                borderColor: 'rgb(255, 166, 0)'
+                borderColor: 'rgb(255, 166, 0)',
+                wordWrap: 'break-word'
             };
         }
-        return { backgroundColor: '' };
+        return { backgroundColor: '',   wordWrap: 'break-word' };
     }
     onGridReady = params => {
         this.gridApi = params.api;

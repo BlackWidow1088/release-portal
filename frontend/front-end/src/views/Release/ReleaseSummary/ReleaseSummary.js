@@ -394,7 +394,10 @@ class ReleaseSummary extends Component {
                 }
             })
         }
-
+            // { key: 'Test Cases', restrictEdit: true, field: 'run', value: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0 },
+        let tcSkipped = `CLI: ${this.props.tcStrategy ? this.props.tcStrategy.skipped : 0 } GUI: 0`;
+        let tcNA = `CLI: ${this.props.tcStrategy ? this.props.tcStrategy.notApplicable : 0 } GUI: 0`;
+        let tcAutomated = `CLI: ${this.props.tcStrategy ? this.props.tcStrategy.totalAutomated : 0 } GUI: 0`;
 
         return (
             <div className="main-container">
@@ -816,19 +819,82 @@ class ReleaseSummary extends Component {
                                 {
                                     <tr>
                                         <td className='rp-app-table-key'>Test Cases</td>
+                                     
                                         <td>
-                                            <span>{this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0}</span>
+                                        <table>
+                                        <tbody>
+                                        <tr>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.totalGUI : 0}</span></td>
                                             {/* <span>(P0: {this.props.selectedRelease.P0},</span>
                                             <span>P1: {this.props.selectedRelease.P1},</span>
                                             <span>P2: {this.props.selectedRelease.P2})</span> */}
+                                            </tr>
+                                        </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                }
+                                                                {
+                                    <tr>
+                                        <td className='rp-app-table-key'>Test Cases Automated</td>
+                                        <td>
+                                        <table>
+                                        <tbody>
+                                        <tr>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.totalAutomated : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUIAutomated : 0}</span></td>
+                                            {/* <span>(P0: {this.props.selectedRelease.P0},</span>
+                                            <span>P1: {this.props.selectedRelease.P1},</span>
+                                            <span>P2: {this.props.selectedRelease.P2})</span> */}
+                                            </tr>
+                                        </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                }
+                                                                {
+                                    <tr>
+                                        <td className='rp-app-table-key'>Test Cases Skipped</td>
+                                        <td>
+                                        <table>
+                                        <tbody>
+                                        <tr>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.skipped : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUISkip : 0}</span></td>
+                                            {/* <span>(P0: {this.props.selectedRelease.P0},</span>
+                                            <span>P1: {this.props.selectedRelease.P1},</span>
+                                            <span>P2: {this.props.selectedRelease.P2})</span> */}
+                                            </tr>
+                                        </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                }
+                                                                {
+                                    <tr>
+                                        <td className='rp-app-table-key'>Test Cases Not Applicable</td>
+                                        <td>
+                                        <table>
+                                        <tbody>
+                                        <tr>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.notApplicable : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUINotApplicable : 0}</span></td>
+                                            {/* <span>(P0: {this.props.selectedRelease.P0},</span>
+                                            <span>P1: {this.props.selectedRelease.P1},</span>
+                                            <span>P2: {this.props.selectedRelease.P2})</span> */}
+                                            </tr>
+                                        </tbody>
+                                        </table>
                                         </td>
                                     </tr>
                                 }
                                 {
                                     [
-                                        // { key: 'Test Cases', restrictEdit: true, field: 'run', value: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0 },
-                                        { key: 'Test Cases Skipped', restrictEdit: true, field: 'skip', value: this.props.tcStrategy ? this.props.tcStrategy.skipped : 0 },
-                                        { key: 'Test Cases Not Applicable', restrictEdit: true, field: 'na', value: this.props.tcStrategy ? this.props.tcStrategy.notApplicable : 0 },
+                                        // { key: 'Test Cases Automated', restrictEdit: true, field: 'automated', value: tcAutomated },
+                                        // // { key: 'Test Cases', restrictEdit: true, field: 'run', value: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0 },
+                                        // { key: 'Test Cases Skipped', restrictEdit: true, field: 'skip', value: tcSkipped},
+                                        // { key: 'Test Cases Not Applicable', restrictEdit: true, field: 'na', value: tcNA },
                                         { key: 'QA Start Date', field: 'QAStartDate', value: this.props.selectedRelease.QAStartDate, type: 'date' },
                                         { key: 'Target Code Freeze Date', field: 'TargetedCodeFreezeDate', value: this.props.selectedRelease.TargetedCodeFreezeDate, type: 'date' },
                                         // { key: 'Expected rate of Progress per week', field: 'QARateOfProgress', value: this.props.selectedRelease.QARateOfProgress ? this.props.selectedRelease.QARateOfProgress : 0 },

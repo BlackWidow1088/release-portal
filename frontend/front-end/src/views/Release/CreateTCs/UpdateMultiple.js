@@ -31,7 +31,7 @@ import DatePickerEditor from './datePickerEditor';
 
 const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
 const order=['']
-class CreateMultiple extends Component {
+class UpdateMultiple extends Component {
     // [field] : {old,new}
     changeLog = {};
     editedRows= {};
@@ -51,7 +51,7 @@ class CreateMultiple extends Component {
                     cellStyle: { alignItems: 'top' },
                     headerName: "ID", field: "TABLEID", sortable: true, filter: true, cellStyle: this.renderEditedCell,                    
                     width: 50,
-                    hide: true
+                    hide:true
                 },
                 {
                     cellStyle: { alignItems: 'top' },
@@ -70,7 +70,7 @@ class CreateMultiple extends Component {
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['BOS', 'NYNJ', 'COMMON', 'SOFTWARE'],
-                        multiple: true,
+                        // multiple: true,
                     }
 
                 },
@@ -149,67 +149,59 @@ class CreateMultiple extends Component {
             setTimeout(() => this.gridApi.redrawRows(), 1000);
         }
     }
-    gridOperations(enable) {
-        if (enable) {
-            if (this.state.isApiUnderProgress) {
-                this.setState({ isApiUnderProgress: false, loading: false });
-            }
-        } else {
-            if (!this.state.isApiUnderProgress) {
-                this.setState({ isApiUnderProgress: true });
-            }
-        }
-    }
     saveAll() {
         this.multipleToggle();
         this.globalErrors = null;
         this.currentID = 0;
         this.save();
+        console.log(this.state.multiple);
     }
     textFields = [
         'Domain', 'SubDomain',
-        'TcID', 'TcName', 'Scenario', 'Tag', 'Priority',
-        'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'Assignee',
+        'TcID', 'TcName', 'Scenario', 'Tag', 'Priority', 'CardType',
+        'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'Assignee', 'WorkingStatus'
     ];
     arrayFields = ['CardType']
     save() {
         this.gridOperations(false)
         this.props.showLoadingMessage(true);
         let row = this.state.multiple[this.currentID];
+        console.log(row)
         let data = {};
         // tc info meta fields
         // data.Role = 'QA';
         // tc info fields
-        this.textFields.map(item => data[item] = row[item]);
-        this.arrayFields.forEach(item => data[item] = this.joinArrays(row[item]));
+        this.textFields.forEach(item => data[item] = `${row[item]}`);
+        // this.arrayFields.forEach(item => data[item] = this.joinArrays(row[item]));
         data.Activity = {
             Release: this.props.selectedRelease.ReleaseNumber,
-            "TcID": data.TcID,
-            "CardType": data.CardType,
-            "UserName": this.props.currentUser.email,
-            "LogData": `CREATED TC`,
-            "RequestType": 'POST',
-            "URL": `/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`
+            "TcID": `${data.TcID}`,
+            "CardType": `${data.CardType}`,
+            "UserName": `${this.props.currentUser.email}`,
+            "LogData": `UPDATED TC`,
+            "RequestType": 'PUT',
+            "URL": `/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`
         };
-        data.WorkingStatus = 'CREATED'
+        console.log(data)
 
-        axios.post(`/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`, { ...data })
+        axios.put(`/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`, { ...data })
             .then(res => {
                 this.currentID += 1;
                 if(this.currentID < this.state.multiple.length) {
                     this.save()
                 } else {
-                    this.gridOperations(true)
+                    this.gridOperations(false)
                     this.props.showLoadingMessage(false);
                     if(this.globalErrors) {
                         this.setState({multipleErrors: this.globalErrors});
-                        alert('Some or all tcs failed to create')
+                        alert('Some or all tcs failed to create. Those failed updating are highlighted below')
                     } else {
                         alert('All tcs created successfully')
                     }
+                    this.gridApi.redrawRows();
                 }
             }, error => {    
-                this.gridOperations(true)
+                this.gridOperations(false)
                 this.props.showLoadingMessage(false);
                 console.log('entered here')
                 if(!this.globalErrors) this.globalErrors = {}     
@@ -220,10 +212,11 @@ class CreateMultiple extends Component {
                 } else {
                     if(this.globalErrors) {
                         this.setState({multipleErrors: this.globalErrors});
-                        alert('Some or all tcs failed to create')
+                        alert('Some or all tcs failed to create. Those failed updating are highlighted below')
                     } else {
-                        alert('Some or all tcs failed to create')
+                        alert('Some or all tcs failed to create. Those failed updating are highlighted below')
                     }
+                    this.gridApi.redrawRows();
                 }
             });
     }
@@ -257,13 +250,12 @@ class CreateMultiple extends Component {
                     errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], SubDomain: 'Should be a value from given subdomains'} };
                 }
 
-                let cards = this.joinArrays(row.CardType);
-                cards.forEach(card => {
+                let card = row.CardType;
                     if(!['NYNJ', 'BOS', 'COMMON', 'SOFTWARE'].includes(card)) {
                         if(!errors) errors = {};
                         errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], CardType: 'Invalid Cardtype'} };
                     }
-                });
+                
                 if(!['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Skip', 'NA'].includes(row.Priority)) {
                     if(!errors) errors = {};
                         errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], Priority: 'Invalid Priority'} };
@@ -284,6 +276,17 @@ class CreateMultiple extends Component {
         } else {
             this.setState({ multipleErrors: errors })
             setTimeout(() => this.gridApi.redrawRows(), 1000)
+        }
+    }
+    gridOperations(enable) {
+        if (enable) {
+            if (this.state.isApiUnderProgress) {
+                this.setState({ isApiUnderProgress: false, loading: false });
+            }
+        } else {
+            if (!this.state.isApiUnderProgress) {
+                this.setState({ isApiUnderProgress: true });
+            }
         }
     }
     renderEditedCell = (params) => {
@@ -349,42 +352,42 @@ class CreateMultiple extends Component {
     toggle = () => this.setState({ modal: !this.state.modal });
 
 
-    textFields = [
-        'Domain', 'SubDomain',
-        'TcID', 'TcName', 'Scenario', 'Tag', 'Priority',
-        'Description', 'Steps', 'ExpectedBehaviour', 'Notes',
-    ];
-    arrayFields = ['CardType', 'ServerType']
-    whichFieldsUpdated(old, latest) {
-        let changes = {};
-        this.textFields.forEach(item => {
-            if (old[item] !== latest[item]) {
-                changes[item] = { old: old[item], new: latest[item] }
-            }
-        });
-        this.arrayFields.forEach(item => {
-            if (!old[item] && latest[item]) {
-                changes[item] = { old: '', new: latest[item] }
-            } else if (!latest[item] && old[item]) {
-                changes[item] = { old: old[item], new: '' }
-            } else if (old[item] && latest[item]) {
-                let arrayChange = latest[item].filter(each => old[item].includes(each));
-                if (arrayChange.length > 0) {
-                    changes[item] = { old: old[item], new: latest[item] }
-                }
-            }
-        });
-        return changes;
-    }
-    joinArrays(array) {
-        if (!array) {
-            array = [];
-        }
-        if (array && !Array.isArray(array)) {
-            array = `${array}`.split(',');
-        }
-        return array;
-    }
+    // textFields = [
+    //     'Domain', 'SubDomain',
+    //     'TcID', 'TcName', 'Scenario', 'Tag', 'Priority',
+    //     'Description', 'Steps', 'ExpectedBehaviour', 'Notes',
+    // ];
+    // arrayFields = ['CardType', 'ServerType']
+    // whichFieldsUpdated(old, latest) {
+    //     let changes = {};
+    //     this.textFields.forEach(item => {
+    //         if (old[item] !== latest[item]) {
+    //             changes[item] = { old: old[item], new: latest[item] }
+    //         }
+    //     });
+    //     this.arrayFields.forEach(item => {
+    //         if (!old[item] && latest[item]) {
+    //             changes[item] = { old: '', new: latest[item] }
+    //         } else if (!latest[item] && old[item]) {
+    //             changes[item] = { old: old[item], new: '' }
+    //         } else if (old[item] && latest[item]) {
+    //             let arrayChange = latest[item].filter(each => old[item].includes(each));
+    //             if (arrayChange.length > 0) {
+    //                 changes[item] = { old: old[item], new: latest[item] }
+    //             }
+    //         }
+    //     });
+    //     return changes;
+    // }
+    // joinArrays(array) {
+    //     if (!array) {
+    //         array = [];
+    //     }
+    //     if (array && !Array.isArray(array)) {
+    //         array = `${array}`.split(',');
+    //     }
+    //     return array;
+    // }
     onGridReady = params => {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
@@ -437,16 +440,18 @@ class CreateMultiple extends Component {
         let rowData = [];
         return (
             <div>
+                <div style={{textAlign: 'center'}} className='rp-app-table-value'>Don't edit the TcID and CardType of rows</div>
                 <Row>
                     {/* <Col className='col-md-5'>
                         <span>Upload CSV file</span>
                         <CSVReader onFileLoaded={data => this.parseData(data, 'CSV')} />
                     </Col> */}
-                     { !this.state.isApiUnderProgress &&
+                    { !this.state.isApiUnderProgress &&
                                                 <Button style={{ position: 'absolute', right: '1rem' }} title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmMultipleToggle()} >
                                                 <i className="fa fa-save"></i>
                             </Button>
-    }
+                    }
+
                      <Col className='col-md-5' style={{ marginBottom: '1rem' }}>
                      <div className='rp-app-table-value' style={{ marginBottom: '0.3rem' }}>Allowed Domains and SubDomains</div>
                      <FormGroup row className="my-0" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
@@ -545,7 +550,7 @@ const mapStateToProps = (state, ownProps) => ({
     selectedTC: state.testcase.all[state.release.current.id],
     testcaseDetail: state.testcase.testcaseDetail
 })
-export default connect(mapStateToProps, { saveTestCase, saveTestCaseStatus, saveSingleTestCase })(CreateMultiple);
+export default connect(mapStateToProps, { saveTestCase, saveTestCaseStatus, saveSingleTestCase })(UpdateMultiple);
 
 
 

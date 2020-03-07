@@ -21,6 +21,8 @@ import axios from 'axios';
 import { saveTestCase, saveTestCaseStatus, saveSingleTestCase } from '../../../actions';
 import TestCases from '../../../components/TestCases/TestCases';
 import TestCasesAll from '../../../components/TestCasesAll/TestCasesAll';
+import TestCasesLifecycle from '../../../components/TestCasesLifecycle/TestCasesLifecycle';
+
 import './ReleaseTestMetrics.scss'
 import Sunburst from '../components/Sunburst';
 import { CustomTooltips } from '@coreui/coreui-plugin-chartjs-custom-tooltips';
@@ -143,9 +145,17 @@ class ReleaseTestMetrics extends Component {
         return (
             <div>
                 <TestCasesAll title={'Test Cases'} type='all'></TestCasesAll>
-                {/* <TestCasesAll title={tcTypes.PFAPPROVAL.title} type={tcTypes.PFAPPROVAL.type}></TestCasesAll>
-                <TestCasesAll title={tcTypes.PFASSIGN.title} type={tcTypes.PFASSIGN.type}></TestCasesAll>
-                <TestCasesAll title={tcTypes.ASSIGNAUTO.title} type={tcTypes.ASSIGNAUTO.type}></TestCasesAll>
+                {/* <TestCasesLifecycle title={tcTypes.ALL.title} type={tcTypes.ALL}></TestCasesLifecycle> */}
+                {/* {
+                    this.props.currentUser && this.props.currentUser.isAdmin &&
+                    <TestCasesLifecycle title={tcTypes.PFAPPROVAL.title} type={tcTypes.PFAPPROVAL}></TestCasesLifecycle>
+                }
+                {
+                    this.props.currentUser && this.props.currentUser.isAdmin &&
+                    <TestCasesLifecycle title={tcTypes.PFREGRESSION.title} type={tcTypes.PFREGRESSION}></TestCasesLifecycle>
+                } */}
+
+                {/* <TestCasesAll title={tcTypes.ASSIGNAUTO.title} type={tcTypes.ASSIGNAUTO.type}></TestCasesAll>
                 <TestCasesAll title={tcTypes.ASSIGNREGRESSION.title} type={tcTypes.ASSIGNREGRESSION.type}></TestCasesAll>
                 <TestCasesAll title={tcTypes.ASSIGNEDAUTO.title} type={tcTypes.ASSIGNEDAUTO.type}></TestCasesAll>
                 <TestCasesAll title={tcTypes.ASSIGNEDREGRESSION.title} type={tcTypes.ASSIGNEDREGRESSION.type}></TestCasesAll>

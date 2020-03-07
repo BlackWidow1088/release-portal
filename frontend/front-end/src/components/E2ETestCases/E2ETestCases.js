@@ -118,18 +118,19 @@ class E2ETestCases extends Component {
                     editable: true,
                     cellEditor: "datePicker",
                     filter: 'agDateColumnFilter',
-                    width: 180
+                    width: 150
                 },
                 {
                     headerName: "Setup Type", field: "Setup", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     editable: true,
+                    width:100
                 },
 
                 {
                     headerName: "Build", field: "Build", 
                     editable: true, 
                     sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-
+                    width:100
                 },
                 {
                     headerName: "Result", field: "Result",
@@ -138,17 +139,13 @@ class E2ETestCases extends Component {
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['Select Result', 'Fail', 'Pass']
-                    }
+                    },
+                    width:100
                 },
                 {
                     headerName: "Bug", field: "Bug",
                      editable: true, 
                      sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
-                },
-                {
-                    headerName: "E2EFocus", field: "E2EFocus", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
-                    cellClass: 'cell-wrap-text',
-                    editable: true,
                 },
                 {
                     headerName: "Passed Tcs", field: "NoOfTCsPassed", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
@@ -157,10 +154,19 @@ class E2ETestCases extends Component {
                     filter: 'agNumberColumnFilter',
                     editable: true,
                 },
-
+                {
+                    headerName: "E2EFocus", field: "E2EFocus", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '420',
+                    cellClass: 'cell-wrap-text',
+                    editable: true,
+                },
+                {
+                    headerName: "E2ESkipList", field: "E2ESkipList", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '420',
+                    cellClass: 'cell-wrap-text',
+                    editable: true,
+                },
 
                 {
-                    headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell,
+                    headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell,width: '100',
                     editable: true,
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
@@ -169,12 +175,12 @@ class E2ETestCases extends Component {
 
                 },
                 {
-                    headerName: "User", field: "User", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
+                    headerName: "User", field: "User", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '150',
                     cellClass: 'cell-wrap-text',
                     editable: true,
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
-                        values: this.props.users
+                        values: ['Select Assignee', 'Jenkin', ...this.props.users]
                     }
                 },
                 {
@@ -228,11 +234,21 @@ class E2ETestCases extends Component {
     }
 
     getRowHeight = (params) => {
+        let noteHeight = 0, e2eFocus = 0, skipList = 0;
         if (params.data && params.data.Notes) {
-            return 28 * (Math.floor(params.data.Notes.length / 60) + 1);
+            noteHeight = 28 * (Math.floor(params.data.Notes.length / 60) + 1)
+        }
+        if (params.data && params.data.E2EFocus) {
+            e2eFocus = 28 * (Math.floor(params.data.E2EFocus.length / 60) + 1)
+        }
+        if (params.data && params.data.E2ESkipList) {
+            skipList = 28 * (Math.floor(params.data.E2ESkipList.length / 60) + 1)
         }
         // assuming 50 characters per line, working how how many lines we need
-        return 28;
+        if(noteHeight +e2eFocus+skipList === 0) {
+            return 28;
+        }
+        return Math.max(noteHeight, e2eFocus, skipList);
     }
     getActivityRowHeight = (params) => {
         if (params.data && params.data.LogData) {
@@ -268,11 +284,11 @@ class E2ETestCases extends Component {
         if (newProps && this.props && this.props.e2eCounter && newProps.e2eCounter !== this.props.e2eCounter) {
             this.getTcs();
         }
-        if (newProps && this.props && this.props.deleteCounter && newProps.deleteCounter !== this.props.deleteCounter) {
-            this.delete();
-        }
         if (newProps && this.props && this.props.saveCounter && newProps.saveCounter !== this.props.saveCounter) {
             this.save();
+        }
+        if (newProps && this.props && this.props.deleteCounter && newProps.deleteCounter !== this.props.deleteCounter) {
+            this.delete();
         }
     }
     delete = () => {
@@ -288,8 +304,19 @@ class E2ETestCases extends Component {
             alert('Please select atleast one E2E to delete');
             return;
         }
-        items = items.map(each => ({
-            ...each,
+        let sendingItems = items.map(each => ({
+            id:each.id,
+            Date: each.Date,
+            Setup: each.Setup,
+            Build: each.Build,
+            Bug: each.Bug,
+            E2EFocus: each.E2EFocus,
+            E2ESkipList: each.E2ESkipList,
+            NoOfTCsPassed: each.NoOfTCsPassed,
+            Notes: each.Notes,
+            User: each.User,
+            Result: `${each.Result}`,
+            CardType: `${each.CardType}`, 
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -299,12 +326,12 @@ class E2ETestCases extends Component {
                 "RequestType": 'DELETE',
                 "URL": `/api/sanity/e2eDelete/${this.props.selectedRelease.ReleaseNumber}`
             }
-        }))
+        }));
 
         this.gridOperations(false);
 
         let url = `/api/sanity/e2eDelete/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.post(url, [...items])
+        axios.post(url, sendingItems)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -327,14 +354,27 @@ class E2ETestCases extends Component {
         if (!this.gridApi) {
             return;
         }
-        let items = this.gridApi.getSelectedRows();
-
+        let items = [...this.gridApi.getSelectedRows()];
+        let edited = this.gridApi.getEditingCells();
+        console.log('before save')
+        console.log(edited);
         if (items.length <= 0) {
             alert('Please select atleast one E2E to save');
             return;
         }
-        items = items.map(each => ({
-            ...each,
+        let sendingItems = items.map(each => ({
+            id:each.id,
+            Date: each.Date,
+            Setup: each.Setup,
+            Build: each.Build,
+            Bug: each.Bug,
+            E2EFocus: each.E2EFocus,
+            E2ESkipList: each.E2ESkipList,
+            NoOfTCsPassed: each.NoOfTCsPassed,
+            Notes: each.Notes,
+            User: each.User,
+            Result: `${each.Result}`,
+            CardType: `${each.CardType}`, 
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -349,7 +389,7 @@ class E2ETestCases extends Component {
         this.gridOperations(false);
 
         let url = `/api/sanity/e2eUpdate/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.post(url, [...items])
+        axios.post(url, sendingItems)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -360,11 +400,12 @@ class E2ETestCases extends Component {
                 this.gridOperations(true);
 
             }).catch(err => {
-                alert('failed to delete e2e results');
+                alert('failed to update e2e results');
                 this.gridOperations(true);
             })
     }
     deselect(updateTotalRows) {
+        this.editedRows = {};
         if (this.gridApi) {
             this.gridApi.deselectAll();
         }
@@ -377,17 +418,18 @@ class E2ETestCases extends Component {
         }
     }
     renderEditedCell = (params) => {
-        let editedInRow = this.editedRows[`${params.data.id}_${params.data.CardType}`] && this.editedRows[`${params.data.id}_${params.data.CardType}`][params.colDef.field] && this.editedRows[`${params.data.id}_${params.data.CardType}`][params.colDef.field].originalValue !== params.value;
+        let editedInRow = this.editedRows[`id${params.data.id}`] && this.editedRows[`id${params.data.id}`][params.colDef.field] && this.editedRows[`id${params.data.id}`][params.colDef.field].originalValue !== params.value;
         if (editedInRow) {
-            this.editedRows[`${params.data.id}_${params.data.CardType}`].Changed = true;
+            this.editedRows[`id${params.data.id}`].Changed = true;
             return {
                 backgroundColor: 'rgb(209, 255, 82)',
                 borderStyle: 'solid',
                 borderWidth: '1px',
-                borderColor: 'rgb(255, 166, 0)'
+                borderColor: 'rgb(255, 166, 0)',
+                wordWrap: 'break-word'
             };
         }
-        return { backgroundColor: '' };
+        return { backgroundColor: '', wordWrap: 'break-word' };
     }
     onGridReady = params => {
         this.gridApi = params.api;
@@ -395,30 +437,30 @@ class E2ETestCases extends Component {
         params.api.sizeColumnsToFit();
     };
     onCellEditingStarted = params => {
-        if (this.editedRows[`${params.data.id}_${params.data.CardType}`]) {
-            if (this.editedRows[`${params.data.id}_${params.data.CardType}`][params.colDef.field]) {
-                this.editedRows[`${params.data.id}_${params.data.CardType}`][params.colDef.field] =
-                    { ...this.editedRows[`${params.data.id}_${params.data.CardType}`][params.colDef.field], oldValue: params.value }
+        if (this.editedRows[`id${params.data.id}`]) {
+            if (this.editedRows[`id${params.data.id}`][params.colDef.field]) {
+                this.editedRows[`id${params.data.id}`][params.colDef.field] =
+                    { ...this.editedRows[`id${params.data.id}`][params.colDef.field], oldValue: params.value }
             } else {
-                this.editedRows[`${params.data.id}_${params.data.CardType}`] =
-                    { ...this.editedRows[`${params.data.id}_${params.data.CardType}`], [params.colDef.field]: { oldValue: params.value, originalValue: params.value } }
+                this.editedRows[`id${params.data.id}`] =
+                    { ...this.editedRows[`id${params.data.id}`], [params.colDef.field]: { oldValue: params.value, originalValue: params.value } }
             }
         } else {
-            this.editedRows[`${params.data.id}_${params.data.CardType}`] = { [params.colDef.field]: { oldValue: params.value, originalValue: params.value } }
+            this.editedRows[`id${params.data.id}`] = { [params.colDef.field]: { oldValue: params.value, originalValue: params.value } }
         }
     }
     onCellEditing = (params, field, value) => {
-        if (this.editedRows[`${params.id}_${params.CardType}`]) {
-            if (this.editedRows[`${params.id}_${params.CardType}`][field]) {
-                this.editedRows[`${params.id}_${params.CardType}`][field] =
-                    { ...this.editedRows[`${params.id}_${params.CardType}`][field], oldValue: params[field], newValue: value }
+        if (this.editedRows[`id${params.data.id}`]) {
+            if (this.editedRows[`id${params.data.id}`][field]) {
+                this.editedRows[`id${params.data.id}`][field] =
+                    { ...this.editedRows[`id${params.data.id}`][field], oldValue: params[field], newValue: value }
             } else {
-                this.editedRows[`${params.id}_${params.CardType}`] =
-                    { ...this.editedRows[`${params.id}_${params.CardType}`], [field]: { oldValue: params[field], originalValue: params[field], newValue: value } }
+                this.editedRows[`id${params.data.id}`] =
+                    { ...this.editedRows[`id${params.data.id}`], [field]: { oldValue: params[field], originalValue: params[field], newValue: value } }
             }
 
         } else {
-            this.editedRows[`${params.id}_${params.CardType}`] = {
+            this.editedRows[`id${params.data.id}`] = {
                 id: { oldValue: `${params.id}`, originalValue: `${params.id}`, newValue: `${params.id}` },
                 [field]: { oldValue: params[field], originalValue: params[field], newValue: value }
             }
@@ -449,7 +491,7 @@ class E2ETestCases extends Component {
         this.deselect(true);
         this.props.saveE2E([]);
         let url = `/api/sanity/e2e/${release}`;
-        axios.get(url)
+        setTimeout(() => axios.get(url)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -461,7 +503,7 @@ class E2ETestCases extends Component {
             }).catch(err => {
                 this.deselect();
                 this.gridOperations(true);
-            })
+            }), 300);
     }
     toggle = () => this.setState({ modal: !this.state.modal });
     reset() {
@@ -478,7 +520,7 @@ class E2ETestCases extends Component {
     }
 
     textFields = [
-        'Build', 'Result', 'Notes', 'E2EFocus', 'NoOfTCsPassed', 'Bug',
+        'Build', 'Result', 'Notes', 'E2EFocus', 'E2ESkipList', 'NoOfTCsPassed', 'Bug',
     ];
     arrayFields = ['CardType', 'User']
     whichFieldsUpdated(old, latest) {
@@ -657,7 +699,7 @@ class E2ETestCases extends Component {
                                     stopEditingWhenGridLosesFocus={true}
                                     overlayLoadingTemplate={this.state.overlayLoadingTemplate}
                                     overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
-                                // cellDoubleClicked={(e) => this.cellDoubleClicked(e)}
+                                    // cellDoubleClicked={(e) => this.cellDoubleClicked(e)}
                                 />
                             </div>
                         </div>
@@ -673,7 +715,7 @@ class E2ETestCases extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
     user: state.auth.currentUser,
-    users: ['Select Assignee', 'Jenkin',...state.user.users.map(item => item.email)],
+    users: state.user.users.map(item => item.email),
     selectedRelease: getCurrentRelease(state, state.release.current.id),
     data: state.testcase.e2e,
     E2EDetails: state.testcase.e2eDetails, //E2EDetails

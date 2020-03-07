@@ -118,34 +118,42 @@ class LongevityTestCases extends Component {
                     editable: true,
                     cellEditor: "datePicker",
                     filter: 'agDateColumnFilter',
-                    width: 180
+                    width: 120
                 },
                 {
                     headerName: "Setup Type", field: "Setup", sortable: true, filter: true, cellStyle: this.renderEditedCell,cellClass: 'cell-wrap-text',
                     editable: true,
-
+                    width:80
                 },
 
                 {
-                    headerName: "Build", field: "Build", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-
+                    headerName: "Build", field: "Build", 
+                    editable: true, 
+                    sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                    width:80
                 },
                 {
-                    headerName: "Result", field: "Result", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                    headerName: "Result", field: "Result", 
+                    editable: true,
+                     sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['Select Result', 'Fail', 'Pass']
-                    }
+                    },
+                    width:80
                 },
                 {
-                    headerName: "Bug", field: "Bug", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
+                    headerName: "Bug", field: "Bug", 
+                    editable: true, 
+                    sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
+                    width:80
                 },
                 {
                     headerName: "Duration (days)", field: "NoOfDuration", editable: true, sortable: true, filter: true, cellStyle: this.renderEditedCell,
                      cellClass: 'cell-wrap-text',
                      cellEditor: 'numericEditor',
                      filter: 'agNumberColumnFilter',
-
+                     width:100
                 },
 
 
@@ -156,7 +164,8 @@ class LongevityTestCases extends Component {
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: this.props.users
-                    }
+                    },
+                    width:150
                 },
                 {
                     headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell,
@@ -164,7 +173,8 @@ class LongevityTestCases extends Component {
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['Select Card', 'BOS', 'NYNJ', 'COMMON', 'SOFTWARE']
-                    }
+                    },
+                    width:80
 
                 },
                 {
@@ -273,14 +283,23 @@ class LongevityTestCases extends Component {
         if (!this.gridApi) {
             return;
         }
-        let items = this.gridApi.getSelectedRows();
+        let items = [...this.gridApi.getSelectedRows()];
 
         if (items.length <= 0) {
             alert('Please select atleast one Longevity to save');
             return;
         }
-        items = items.map(each => ({
-            ...each,
+        let sendingItems = items.map(each => ({
+            id: each.id,
+            Date: each.Date,
+            Setup: each.Setup,
+            Result:each.Result,
+            Build: each.Build,
+            Bug: each.Bug,
+            NoOfDuration: each.NoOfDuration,
+            User:each.User,
+            CardType:each.CardType,
+            Notes:each.Notes, 
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -293,7 +312,7 @@ class LongevityTestCases extends Component {
         }))
         this.gridOperations(false);
         let url = `/api/sanity/longevityUpdate/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.post(url, [...items])
+        axios.post(url, sendingItems)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -315,14 +334,22 @@ class LongevityTestCases extends Component {
         if (!this.gridApi) {
             return;
         }
-        let items = this.gridApi.getSelectedRows();
+        let items = [...this.gridApi.getSelectedRows()];
 
         if (items.length <= 0) {
             alert('Please select atleast one Longevity to delete');
             return;
         }
-        items = items.map(each => ({
-            ...each,
+        let sendingItems = items.map(each => ({
+            id: each.id,
+            Date: each.Date,
+            Setup: each.Setup,
+            Result:each.Result,
+            Bug: each.Bug,
+            NoOfDuration: each.NoOfDuration,
+            User:each.User,
+            CardType:each.CardType,
+            Notes:each.Notes, 
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -335,7 +362,7 @@ class LongevityTestCases extends Component {
         }))
         this.gridOperations(false);
         let url = `/api/sanity/longevityDelete/${this.props.selectedRelease.ReleaseNumber}`;
-        axios.post(url, [...items])
+        axios.post(url, sendingItems)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -356,6 +383,7 @@ class LongevityTestCases extends Component {
         this.setState({ selectedRows: event.api.getSelectedRows().length })
     }
     deselect(updateTotalRows) {
+        this.editedRows = {};
         if (this.gridApi) {
             this.gridApi.deselectAll();
         }
@@ -375,10 +403,11 @@ class LongevityTestCases extends Component {
                 backgroundColor: 'rgb(209, 255, 82)',
                 borderStyle: 'solid',
                 borderWidth: '1px',
-                borderColor: 'rgb(255, 166, 0)'
+                borderColor: 'rgb(255, 166, 0)',
+                wordWrap: 'break-word'
             };
         }
-        return { backgroundColor: '' };
+        return { backgroundColor: '',   wordWrap: 'break-word' };
     }
     onGridReady = params => {
         this.gridApi = params.api;
@@ -441,7 +470,7 @@ class LongevityTestCases extends Component {
         this.deselect(true);
         this.props.saveLongevity([]);
         let url = `/api/sanity/longevity/${release}`;
-        axios.get(url)
+        setTimeout(() => axios.get(url)
             .then(all => {
                 // Filters should not go away if data is reloaded
                 //this.setState({ domain: this.state.domain, subDomain: this.state.domain, CardType: this.state.CardType, data: null, rowSelect: false })
@@ -453,7 +482,7 @@ class LongevityTestCases extends Component {
             }).catch(err => {
                 this.deselect();
                 this.gridOperations(true);
-            })
+            }),300);
     }
     toggle = () => this.setState({ modal: !this.state.modal });
     reset() {

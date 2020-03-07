@@ -404,7 +404,8 @@ export const getTCForStatus = (state, id) => {
                 backgroundColor: 'rgba(128,128,128,0.3)',
                 borderColor: 'white',
                 borderWidth: 1,
-                data: [3876]
+                data: [release.TcAggregate.all.GUI]
+                // data: [0]
             },
             ]
         })
@@ -427,7 +428,8 @@ export const getTCForStatus = (state, id) => {
     if (release.ReleaseNumber === '2.3.0') {
         total.push(3876)
     } else {
-        total.push(3876);
+        total.push(release.TcAggregate.all.GUI);
+        // total.push(0);
     }
     return {
         data,
@@ -470,8 +472,14 @@ export const getTCForStrategy = (state, id) => {
     //         }],
     // };
     return {
+        GUISkip: release.TcAggregate.all.GUISkip ? release.TcAggregate.all.GUISkip : 0,
+        GUIAutomated: release.TcAggregate.all.GUIAutomated ? release.TcAggregate.all.GUIAutomated : 0,
+        GUINotAvailable: release.TcAggregate.all.GUINotAvailable ? release.TcAggregate.all.GUINotAvailable : 0,
+        totalGUI : release.TcAggregate.all.GUI ? release.TcAggregate.all.GUI : 0,
+        totalAutomated: release.TcAggregate.all.Automated ? release.TcAggregate.all.Automated : 0,
+        totalNonAutomated: release.TcAggregate.all.NonAutomated ? release.TcAggregate.all.NonAutomated : 0,
         totalTests: release.TcAggregate.all.TotalTested + release.TcAggregate.all.NotTested + release.TcAggregate.all.Skip + release.TcAggregate.all.NotApplicable,
-        skipped: release.TcAggregate.all.Skip,
+        skipped: release.TcAggregate.all.Skip ? release.TcAggregate.all.Skip : 0,
         notApplicable: release.TcAggregate.all.NotApplicable,
         needToRun: release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail + release.TcAggregate.all.NotTested
     };

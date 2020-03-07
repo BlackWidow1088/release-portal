@@ -98,21 +98,21 @@ export const assigneeTypes = {
     ADMIN: 'ADMIN'
 }
 
-export const assigneeMissing = (request, method) => {
+export const AssigneeMissing = (request, method) => {
     if (request && request.assignee && request.assignee !== 'ADMIN') {
         return false;
     } else {
         return { error: `assignee required for ${method}` }
     }
 }
-export const autoAssigneeMissing = (request, method) => {
+export const AutoAssigneeMissing = (request, method) => {
     if (request && request.autoAssignee && request.autoAssignee !== 'ADMIN') {
         return false;
     } else {
         return { error: `auto-assignee required for ${method}` }
     }
 }
-export const devAssigneeMissing = (request, method) => {
+export const DevAssigneeMissing = (request, method) => {
     if (request && request.devAssignee && request.devAssignee !== 'ADMIN') {
         return false;
     } else {
@@ -121,209 +121,230 @@ export const devAssigneeMissing = (request, method) => {
 }
 
 export const steps = {
-    'onAdminCreate': () => ({ step: 'onAdminCreate', PreviousWorkingStatus: 'CREATED', WorkingStatus: 'UNASSIGNED', assignee: 'ADMIN', autoAssignee: 'ADMIN', devAssignee: null, InitialWorkingStatus: 'CREATED' }), //2.1
-    'onAdminMasterClone': () => ({ step: 'onAdminMasterClone', PreviousWorkingStatus: 'FROM_MASTER', WorkingStatus: 'UNASSIGNED', assignee: 'ADMIN', autoAssignee: 'ADMIN', devAssignee: null, InitialWorkingStatus: 'FROM_MASTER' }), //2.2
+    'onAdminCreate': () => ({ step: 'onAdminCreate', PreviousWorkingStatus: 'onAdminCreate', WorkingStatus: 'UNASSIGNED', Assignee: 'ADMIN', AutoAssignee: 'ADMIN', DevAssignee: null, InitialWorkingStatus: 'CREATED' }), //2.1
+    'onAdminMasterClone': () => ({ step: 'onAdminMasterClone', PreviousWorkingStatus: 'onAdminMasterClone', WorkingStatus: 'UNASSIGNED', Assignee: 'ADMIN', AutoAssignee: 'ADMIN', DevAssignee: null, InitialWorkingStatus: 'FROM_MASTER' }), //2.2
 
     'onAdminInit': (request) => {
         return {
             step: 'onAdminInit',
-            PreviousWorkingStatus: request && request.PreviousWorkingStatus ? request.PreviousWorkingStatus : 'APPROVED',
-            WorkingStatus: request && request.assignee && request.assignee !== 'ADMIN' ? 'MANUAL_ASSIGNED' : 'UNASSIGNED',
-            assignee: request && request.assignee ? request.assignee : 'ADMIN',
-            autoAssignee: request && request.autoAssignee ? request.autoAssignee : 'ADMIN',
-            devAssignee: request && request.devAssignee ? request.devAssignee : null,
+            PreviousWorkingStatus: request.step,
+            WorkingStatus: 'UNASSIGNED',
+            Assignee: 'ADMIN',
+            AutoAssignee: 'ADMIN',
+            DevAssignee: null,
             InitialWorkingStatus: request && request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
         }
     }, //2.5 
+    // 'onAdminPendingForRegression': (request) => {
+    //     return {
+    //         step: 'onAdminPendingForRegression',
+    //         PreviousWorkingStatus: request.step,
+    //         WorkingStatus: 'UNASSIGNED',
+    //         Assignee: 'ADMIN',
+    //         AutoAssignee: request && request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+    //         DevAssignee: request && request.DevAssignee ? request.DevAssignee : null,
+    //         InitialWorkingStatus: request && request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
+    //     }
+    // },
+    // 'onAdminPendingForAuto': (request) => {
+    //     return {
+    //         step: 'onAdminPendingForAuto',
+    //         PreviousWorkingStatus: request.step,
+    //         WorkingStatus: 'UNASSIGNED',
+    //         Assignee: request && request.Assignee ? request.Assignee : 'ADMIN',
+    //         AutoAssignee: 'ADMIN',
+    //         DevAssignee: request && request.DevAssignee ? request.DevAssignee : null,
+    //         InitialWorkingStatus: request && request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
+    //     }
+    // },
 
     'onNonAdminCreateRequest': (request) => {
-        let missing = assigneeMissing(request, 'onNonAdminCreateRequest')
+        let missing = AssigneeMissing(request, 'onNonAdminCreateRequest')
         if (!missing) {
-            return { step: 'onNonAdminCreateRequest', PreviousWorkingStatus: 'CREATED', WorkingStatus: 'PENDING_FOR_APPROVAL', assignee: request.assignee, autoAssignee: 'ADMIN', devAssignee: null, InitialWorkingStatus: 'CREATED' }
+            return { step: 'onNonAdminCreateRequest', PreviousWorkingStatus: 'onNonAdminCreateRequest', WorkingStatus: 'PENDING_FOR_APPROVAL', Assignee: request.Assignee, AutoAssignee: 'ADMIN', DevAssignee: null, InitialWorkingStatus: 'CREATED' }
         }
         return missing
-    }, //1 //assignee compulsory
+    }, //1 //Assignee compulsory
 
     'onAdminDelete': (request) => {
-        let missing = assigneeMissing(request, 'onAdminDelete')
+        let missing = AssigneeMissing(request, 'onAdminDelete')
         if (!missing) {
             return {
                 step: 'onAdminDelete',
-                PreviousWorkingStatus: request.PreviousWorkingStatus ? request.PreviousWorkingStatus : 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'DELETED',
-                assignee: request.assignee,
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee,
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //1 //assignee compulsory
+    }, //1 //Assignee compulsory
 
     'onAdminCreateRequestUnApprove': (request) => {
-        let missing = assigneeMissing(request, 'onAdminCreateRequestUnApprove')
+        let missing = AssigneeMissing(request, 'onAdminCreateRequestUnApprove')
         if (!missing) {
-            return { step: 'onAdminCreateRequestUnApprove', PreviousWorkingStatus: 'CREATED', WorkingStatus: 'UNAPPROVED', assignee: request.assignee, autoAssignee: 'ADMIN', devAssignee: null, InitialWorkingStatus: 'CREATED' }
+            return { step: 'onAdminCreateRequestUnApprove', PreviousWorkingStatus: request.step, WorkingStatus: 'UNAPPROVED', Assignee: request.Assignee, AutoAssignee: 'ADMIN', DevAssignee: null, InitialWorkingStatus: 'CREATED' }
         }
         return missing
-    }, //3 //assignee compulsory
+    }, //3 //Assignee compulsory
 
     'onAdminCreateRequestApprove': (request) => ({
         step: 'onAdminCreateRequestApprove',
-        PreviousWorkingStatus: 'CREATED',
-        WorkingStatus: request && request.assignee && request.assignee !== 'ADMIN' ? 'MANUAL_ASSIGNED' : 'UNASSIGNED',
-        assignee: request && request.assignee ? request.assignee : 'ADMIN',
-        autoAssignee: 'ADMIN', devAssignee: null, InitialWorkingStatus: 'CREATED'
+        PreviousWorkingStatus: request.step,
+        WorkingStatus: 'UNASSIGNED',
+        Assignee: 'ADMIN',
+        AutoAssignee: 'ADMIN', DevAssignee: null, InitialWorkingStatus: 'CREATED'
     }), //2.3
 
 
 
     'onAdminManualAssigned': (request) => {
-        let missing = assigneeMissing(request, 'onAdminManualAssigned')
+        let missing = AssigneeMissing(request, 'onAdminManualAssigned')
         if (!missing) {
             return {
                 step: 'onAdminManualAssigned',
-                PreviousWorkingStatus: request.PreviousWorkingStatus ? request.PreviousWorkingStatus : 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'MANUAL_ASSIGNED',
-                assignee: request.assignee,
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee,
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //6 //assignee compulsory
+    }, //6 //Assignee compulsory
 
     'onNonAdminManualCompleted': (request) => {
-        let missing = assigneeMissing(request, 'onNonAdminManualCompleted')
+        let missing = AssigneeMissing(request, 'onNonAdminManualCompleted')
         if (!missing) {
             return {
                 step: 'onNonAdminManualCompleted',
-                PreviousWorkingStatus: 'MANUAL_COMPLETED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'PENDING_FOR_APPROVAL',
-                assignee: request.assignee,
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee,
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, // 16 //assignee compulsory
+    }, // 16 //Assignee compulsory
 
     'onAdminManualCompleted': (request) => {
-        let missing = assigneeMissing(request, 'onAdminManualCompleted')
+        let missing = AssigneeMissing(request, 'onAdminManualCompleted')
         if (!missing) {
             return {
                 step: 'onAdminManualCompleted',
-                PreviousWorkingStatus: 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'MANUAL_COMPLETED',
-                assignee: request.assignee,
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee,
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //11 //assignee compulsory
-
+    }, //11 //Assignee compulsory
 
     'onAdminDevAssigned': (request) => {
-        let missing = devAssigneeMissing(request, 'onAdminDevAssigned')
+        let missing = DevAssigneeMissing(request, 'onAdminDevAssigned')
         if (!missing) {
             return {
                 step: 'onAdminDevAssigned',
-                PreviousWorkingStatus: request.PreviousWorkingStatus ? request.PreviousWorkingStatus : 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'DEV_ASSIGNED',
-                assignee: request.assignee ? request.assignee : 'ADMIN',
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee,
+                Assignee: request.Assignee ? request.Assignee : 'ADMIN',
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //8 //dev-assignee compulsory
+    }, //8 //dev-Assignee compulsory
 
     'onNonAdminDevCompleted': (request) => {
-        let missing = devAssigneeMissing(request, 'onNonAdminDevCompleted')
+        let missing = DevAssigneeMissing(request, 'onNonAdminDevCompleted')
         if (!missing) {
             return {
                 step: 'onNonAdminDevCompleted',
-                PreviousWorkingStatus: 'DEV_APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'PENDING_FOR_APPROVAL',
-                assignee: request.assignee ? request.assignee : 'ADMIN',
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee,
+                Assignee: request.Assignee ? request.Assignee : 'ADMIN',
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, // 14 //dev-assignee compulsory
+    }, // 14 //dev-Assignee compulsory
 
     'onAdminDevCompleted': (request) => {
-        let missing = devAssigneeMissing(request, 'onAdminDevCompleted')
+        let missing = DevAssigneeMissing(request, 'onAdminDevCompleted')
         if (!missing) {
             return {
                 step: 'onAdminDevCompleted',
-                PreviousWorkingStatus: 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'DEV_APPROVED',
-                assignee: request.assignee ? request.assignee : 'ADMIN',
-                autoAssignee: request.autoAssignee ? request.autoAssignee : 'ADMIN',
-                devAssignee: request.devAssignee,
+                Assignee: request.Assignee ? request.Assignee : 'ADMIN',
+                AutoAssignee: request.AutoAssignee ? request.AutoAssignee : 'ADMIN',
+                DevAssignee: request.DevAssignee,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //10 //dev-assignee compulsory
+    }, //10 //dev-Assignee compulsory
 
 
 
     'onAdminAutoAssigned': (request) => {
-        let missing = autoAssigneeMissing(request, 'onAdminAutoAssigned')
+        let missing = AutoAssigneeMissing(request, 'onAdminAutoAssigned')
         if (!missing) {
             return {
                 step: 'onAdminAutoAssigned',
-                PreviousWorkingStatus: request.PreviousWorkingStatus ? request.PreviousWorkingStatus : 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'AUTO_ASSIGNED',
-                assignee: request.assignee ? request.assignee : 'ADMIN',
-                autoAssignee: request.autoAssignee,
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee ? request.Assignee : 'ADMIN',
+                AutoAssignee: request.AutoAssignee,
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //7 //auto-assignee compulsory
+    }, //7 //auto-Assignee compulsory
 
     'onNonAdminAutoCompleted': (request) => {
-        let missing = autoAssigneeMissing(request, 'onNonAdminAutoCompleted')
+        let missing = AutoAssigneeMissing(request, 'onNonAdminAutoCompleted')
         if (!missing) {
             return {
                 step: 'onNonAdminAutoCompleted',
-                PreviousWorkingStatus: 'AUTO_COMPLETED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'PENDING_FOR_APPROVAL',
-                assignee: request.assignee ? request.assignee : 'ADMIN',
-                autoAssignee: request.autoAssignee,
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee ? request.Assignee : 'ADMIN',
+                AutoAssignee: request.AutoAssignee,
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, // 18 //auto-assignee compulsory
+    }, // 18 //auto-Assignee compulsory
 
     'onAdminAutoCompleted': (request) => {
-        let missing = autoAssigneeMissing(request, 'onAdminAutoCompleted')
+        let missing = AutoAssigneeMissing(request, 'onAdminAutoCompleted')
         if (!missing) {
             return {
                 step: 'onAdminAutoCompleted',
-                PreviousWorkingStatus: 'APPROVED',
+                PreviousWorkingStatus: request.step,
                 WorkingStatus: 'AUTO_COMPLETED',
-                assignee: request.assignee ? request.assignee : 'ADMIN',
-                autoAssignee: request.autoAssignee,
-                devAssignee: request.devAssignee ? request.devAssignee : null,
+                Assignee: request.Assignee ? request.Assignee : 'ADMIN',
+                AutoAssignee: request.AutoAssignee,
+                DevAssignee: request.DevAssignee ? request.DevAssignee : null,
                 InitialWorkingStatus: request.InitialWorkingStatus ? request.InitialWorkingStatus : 'FROM_MASTER'
             }
         }
         return missing
-    }, //12 //auto-assignee compulsory
+    }, //12 //auto-Assignee compulsory
 }
 
 export const ws = [
@@ -367,12 +388,153 @@ export const roles = {
     QA: { title: 'QA', allowedWS: [] },
     DEVELOPER: { title: 'DEVELOPER', allowedWS: [] },
 };
+
+export const actionSteps = {
+    'onAdminCreate': 'onAdminCreate',
+    'onAdminMasterClone': 'onAdminMasterClone',
+    'onAdminInit': 'onAdminInit',
+    // 'onAdminPendingForRegression': 'onAdminPendingForRegression',
+    // 'onAdminPendingForAuto': 'onAdminPendingForAuto',
+    'onNonAdminCreateRequest': 'onNonAdminCreateRequest',
+    'onAdminDelete': 'onAdminDelete',
+    'onAdminCreateRequestUnApprove': 'onAdminCreateRequestUnApprove',
+    'onAdminCreateRequestApprove': 'onAdminCreateRequestApprove',
+    'onAdminManualAssigned': 'onAdminManualAssigned',
+    'onNonAdminManualCompleted': 'onNonAdminManualCompleted',
+    'onAdminManualCompleted': 'onAdminManualCompleted',
+    'onAdminAutoAssigned': 'onAdminAutoAssigned',
+    'onNonAdminAutoCompleted': 'onNonAdminAutoCompleted',
+    'onAdminAutoCompleted': 'onAdminAutoCompleted',
+    'onAdminDevAssigned': 'onAdminDevAssigned',
+    'onNonAdminDevCompleted': 'onNonAdminDevCompleted',
+    'onAdminDevCompleted': 'onAdminDevCompleted',
+}
+export const specialAdminWorkingStatuses = [
+    'CREATED',
+    'INIT',
+    'FROM_MASTER'
+];
+export const AdminWorkingStatuses = [
+    'APPROVE',
+    'UNAPPROVE',
+    'MANUAL_ASSIGNED',
+    'AUTO_ASSIGNED',
+    'DEV_ASSIGNED',
+    'MANUAL_COMPLETED',
+    'AUTO_COMPLETED',
+    'DEV_COMPLETED',
+    'DELETED',
+]
+export const tcFields = {
+    'Assignee': 'Assignee','DevAssignee': 'DevAssignee','AutoAssignee':'AutoAssignee', 
+    'WorkingStatus':'WorkingStatus','Priority': 'Priority', 
+    'NewTcID':'NewTcID', 'Scenario':'Scenario', 
+    'Description':'Description', 'Notes':'Notes', 'ExpectedBehaviour':'ExpectedBehaviour',
+    'Steps':'Steps', 'Tag':'Tag', 'TcName':'TcName'
+}
+export const tcLifeCycleFields = {
+    'PrevWorkStatus':'PreviousWorkingStatus',
+    'InitWorkStatus': 'InitialWorkingStatus',
+    'Step': 'step',
+}
 export const tcTypes = {
+    'ALL': {
+        type: 'ALL', title: 'Test Cases',
+        roles: [roles.ADMIN.title, roles.QA.title, roles.DEVELOPER.title],
+        whichTCActionStepsFiltered: () => [],
+        whichTCActionStepsAllowed: () => [],
+        isAddingStatusAllowed: () => true,
+    },
     'PFAPPROVAL': {
         type: 'PFAPPROVAL', title: 'Pending for Approval',
-        roles: [roles.ADMIN.title]
+        roles: [roles.ADMIN.title],
+
+        whichTCActionStepsFiltered: (data) => {
+            return data.filter(item => [actionSteps.onNonAdminCreateRequest, actionSteps.onNonAdminManualCompleted,
+            actionSteps.onNonAdminAutoCompleted, actionSteps.onNonAdminDevCompleted].includes(item.step))
+        },
+        whichTCActionStepsAllowed: () => {
+            return [workingStatuses.APPROVED.title, workingStatuses.UNAPPROVED.title,workingStatuses.MANUAL_ASSIGNED.title]
+        },
+        isAddingStatusAllowed: () => false,
+        whichFieldsForDisplay: () => {return [
+            tcFields.Assignee, tcFields.WorkingStatus, tcFields.Priority, tcFields.Scenario, tcFields.Description,
+            tcFields.Notes, tcFields.ExpectedBehaviour, tcFields.Steps, tcFields.Tag, tcFields.TcName
+        ] },
+        whichFieldsForEdit: () => {return [ tcFields.Assignee, tcFields.WorkingStatus,] },
+        isInValid: (request) => {
+            let errors = null;
+            let assignee = request[tcFields.Assignee];
+            if(!(assignee && assignee !== 'ADMIN')) {
+                errors = {[tcFields.Assignee]: 'Assignee cannot be ADMIN or empty'}
+            }
+            return errors;
+        },
+        processRequest: (request) => {
+            let action = request[tcFields.WorkingStatus];
+            let previousAction = request[tcLifeCycleFields.PrevWorkStatus];
+            switch(action) {
+                case workingStatuses.APPROVED.title:
+                    if(previousAction === actionSteps.onNonAdminCreateRequest) {
+                        return steps.onAdminManualAssigned(request);
+                    }
+                    break;
+                case workingStatuses.UNAPPROVED.title:
+                    
+                    break;
+            }
+        }
     },
-    'PFASSIGN': { type: 'PFASSIGN', title: 'Pending for Assignment', roles: [roles.ADMIN.title] },
+    'PFREGRESSION': {
+        type: 'PFREGRESSION', title: 'Pending for Regression', roles: [roles.ADMIN.title],
+        whichTCActionStepsFiltered: (data) => {
+            let validSteps = [
+                actionSteps.onAdminCreate, actionSteps.onAdminMasterClone, actionSteps.onAdminInit,
+                actionSteps.onAdminCreateRequestApprove
+            ];
+            return data.filter(item => {
+                if (validSteps.includes(item.step)) {
+                    return true
+                }
+                if (!item.Assignee || (item.Assignee && item.Assignee === 'ADMIN')) {
+                    return true;
+                }
+                return false;
+            });
+        },
+
+        whichTCActionStepsAllowed: () => {
+            return ['MANUAL_ASSIGNED', 'MANUAL_COMPLETED']
+        },
+        isAddingStatusAllowed: () => true,
+        whichFieldsForDisplay: () => {return [
+            tcFields.Assignee, tcFields.WorkingStatus, tcFields.Priority, tcFields.Scenario, tcFields.Description,
+            tcFields.Notes, tcFields.ExpectedBehaviour, tcFields.Steps, tcFields.Tag, tcFields.TcName
+        ] },
+        whichFieldsForEdit: () => {return [ tcFields.Assignee, tcFields.WorkingStatus,] }
+    },
+    'PFAUTO': {
+        type: 'PFAUTO', title: 'Pending for Automation', roles: [roles.ADMIN.title],
+        whichTCActionStepsFiltered: (data) => {
+            let validSteps = [
+                actionSteps.onAdminCreate, actionSteps.onAdminMasterClone, actionSteps.onAdminInit,
+                actionSteps.onAdminCreateRequestApprove
+            ];
+            return data.filter(item => {
+                if (validSteps.includes(item.step)) {
+                    return true
+                }
+                if (!item.AutoAssignee || (item.Assignee && item.AutoAssignee === 'ADMIN')) {
+                    return true;
+                }
+                return false;
+            });
+        },
+        whichTCActionStepsAllowed: () => {
+            return ['AUTO_ASSIGNED', 'AUTO_COMPLETED']
+        },
+        isAddingStatusAllowed: () => false
+    },
     'ASSIGNAUTO': { type: 'ASSIGNAUTO', title: 'Assign TCs for Automation', roles: [roles.ADMIN.title] },
     'ASSIGNREGRESSION': { type: 'ASSIGNREGRESSION', title: 'Assign TCs for Regression', roles: [roles.ADMIN.title] },
     'ASSIGNEDAUTO': { type: 'ASSIGNEDAUTO', title: 'My Assigned TCs for Automation', roles: [roles.ADMIN.title, roles.QA.title, roles.DEVELOPER.title] },

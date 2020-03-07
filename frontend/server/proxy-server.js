@@ -23,7 +23,6 @@ var URL = ['/api'];
 var USER = ['/user'];
 var JIRA = ['/rest'];
 var TEST = ['/dummy'];
-var VAGSERV = ['/vag'];
 //  var DATA_URL = 'http://localhost:8000';
 //  var DATA_URL = 'http://localhost:5051';
 // var DATA_URL = 'http://172.16.19.57:8000';
@@ -75,12 +74,6 @@ try {
         for (var i = 0; i < TEST.length; i++) {
             if (req.url.startsWith(TEST[i])) {
                 target = TEST_URL;
-                break;
-            }
-        }
-        for (var i = 0; i < VAGSERV.length; i++) {
-            if (req.url.startsWith(VAGSERV[i])) {
-                target = VAGSERV_URL;
                 break;
             }
         }

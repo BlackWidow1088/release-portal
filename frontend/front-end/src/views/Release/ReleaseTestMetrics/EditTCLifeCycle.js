@@ -18,7 +18,7 @@ import axios from 'axios';
 import { saveTestCase, saveTestCaseStatus, saveSingleTestCase, updateTCEdit } from '../../../actions';
 import Multiselect from 'react-bootstrap-multiselect';
 const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
-class EditTC extends Component {
+class EditTCLifeCycle extends Component {
     WorkingStatusOptions = [
         'CREATED',
         'UNAPPROVED',
@@ -102,6 +102,14 @@ class EditTC extends Component {
         let ws = ['CREATED', 'UNASSIGNED', 'DEV_ASSIGNED', 'DEV_APPROVED', 'APPROVED', 'UNAPPROVED', 'MANUAL_ASSIGNED', 'MANUAL_COMPLETED',
             'AUTO_ASSIGNED', 'AUTO_COMPLETED', 'DELETED'
         ];
+        if (this.props.type) {
+            let options = this.props.type.whichTCActionStepsAllowed();
+            if (options && options.length) {
+                ws = options;
+            }
+        }
+        let displayFields = this.props.type.whichFieldsForDisplay();
+        let editFields = this.props.type.whichFieldsForEdit();
         let users = this.props.users && this.props.users.filter(item => item.role !== 'EXECUTIVE');
 
         let cards = this.props.selectedRelease.CardType ? this.props.selectedRelease.CardType.map(item => ({ value: item, selected: this.props.testcaseEdit.CardType && this.props.testcaseEdit.CardType.includes(item) })) : [];
@@ -118,7 +126,7 @@ class EditTC extends Component {
                     }}>
                     </div>
                     {
-                        this.props.isEditing &&
+                        this.props.isEditing && this.props.type.isAddingStatusAllowed() &&
 
                         <FormGroup row className="my-0" style={{ marginTop: '1rem' }}>
 
@@ -176,110 +184,12 @@ class EditTC extends Component {
 
                         </FormGroup>
                     }
-                    {/* <FormGroup row className="my-0" style={{ marginTop: '1rem' }}>
-                        <Col xs="6" md="4" lg="3">
-                            <FormGroup className='rp-app-table-value'>
-                                <Label className='rp-app-table-label' htmlFor="WorkingStatus">
-                                    Working Status
-                                    {
-                                        this.props.testcaseEdit.errors['WorkingStatus'] &&
-                                        <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors['WorkingStatus']}</i>
-                                    }
-                                </Label>
-                                {
-                                    !this.props.isEditing || (!this.props.currentUser.isAdmin && (this.props.testcaseDetail.WorkingStatus === 'CREATED' || this.props.testcaseDetail.WorkingStatus === 'UNAPPROVED')) ?
-                                        <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail.WorkingStatus}</span></div>
-                                        :
-                                        <Input style={{ borderColor: this.props.testcaseEdit.errors['WorkingStatus'] ? 'red' : '' }} className='rp-app-table-value' type="select" id="WorkingStatus" name="WorkingStatus" value={this.props.testcaseEdit && this.props.testcaseEdit.WorkingStatus}
-                                            onChange={(e) => {
-                                                this.setState({ statusChange: true });
-                                                this.props.updateTCEdit({ ...this.props.testcaseEdit, WorkingStatus: e.target.value, errors: { ...this.props.testcaseEdit.errors, WorkingStatus: null } })
-                                            }} >
-                                            {
-                                                this.WorkingStatusOptions &&
-                                                this.WorkingStatusOptions.map(item => <option value={item}>{item}</option>)
-                                            }
-                                        </Input>
-                                }
-                            </FormGroup>
-                            <Collapse isOpen={this.state.statusChange}>
-                                {
-                                    this.props.testcaseEdit.WorkingStatus && this.props.testcaseEdit.WorkingStatus.search('COMPLETED') > 0 ?
-                                        <React.Fragment>
-                                            <div>
-                                                <span className='rp-app-table-label'>Result</span>
-                                                <div style={{ display: 'inlineBlock' }}>
-                                                    <Input type="select" onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, Status: e.target.value, StatusChangeComments: { ...this.props.StatusChangeComments, Result: e.target.value }, errors: { ...this.props.testcaseEdit.errors, StatusChangeComments: null } })} >
-                                                        <option value="Fail">Fail</option>
-                                                        <option value="Pass">Pass</option>
-                                                    </Input>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <span className='rp-app-table-label'>Log Url</span>
-                                                <div style={{ display: 'inlineBlock' }}>
-                                                    <Input type="text" onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, StatusChangeComments: { ...this.props.StatusChangeComments, logURL: e.target.value }, errors: { ...this.props.testcaseEdit.errors, StatusChangeComments: null } })} >
-
-                                                    </Input>
-                                                </div>
-                                            </div>
-                                            <FormGroup className='rp-app-table-value'>
-                                                <Label className='rp-app-table-label' htmlFor="StatusChangeComments">
-                                                    Notes
-                                            </Label>
-                                                {
-                                                    <Input className='rp-app-table-value' placeholder={'Add Comments'} type="textarea" rows='4' id='StatusComments'
-                                                        value={this.props.testcaseEdit && this.props.testcaseEdit.StatusChangeComments && this.props.testcaseEdit.StatusChangeComments.Notes}
-                                                        onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, StatusChangeComments: { ...this.props.StatusChangeComments, Notes: e.target.value }, errors: { ...this.props.testcaseEdit.errors, StatusChangeComments: null } })} >
-
-                                                    </Input>
-                                                }
-                                            </FormGroup>
-                                        </React.Fragment> :
-                                        this.props.testcaseEdit.Status && this.props.testcaseEdit.Status === 'BUG' ?
-                                            <React.Fragment>
-                                                <div>
-                                                    <span className='rp-app-table-label'>DWS Url</span>
-                                                    <div style={{ display: 'inlineBlock' }}>
-                                                        <Input type="text" onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, StatusChangeComments: { ...this.props.StatusChangeComments, logURL: e.target.value }, errors: { ...this.props.testcaseEdit.errors, StatusChangeComments: null } })} >
-                                                        </Input>
-                                                    </div>
-                                                </div>
-                                                <FormGroup className='rp-app-table-value'>
-                                                    <Label className='rp-app-table-label' htmlFor="StatusChangeComments">
-                                                        Notes
-                                            </Label>
-                                                    {
-                                                        <Input className='rp-app-table-value' placeholder={'Add Notes'} type="textarea" rows='4' id='StatusComments'
-                                                            value={this.props.testcaseEdit && this.props.testcaseEdit.StatusChangeComments && this.props.testcaseEdit.StatusChangeComments.Notes}
-                                                            onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, StatusChangeComments: { ...this.props.StatusChangeComments, Notes: e.target.value }, errors: { ...this.props.testcaseEdit.errors, StatusChangeComments: null } })} >
-
-                                                        </Input>
-                                                    }
-                                                </FormGroup>
-                                            </React.Fragment> :
-                                            <FormGroup className='rp-app-table-value'>
-                                                <Label className='rp-app-table-label' htmlFor="StatusChangeComments">
-                                                    Add Comments for changing Status
-                                            </Label>
-                                                {
-                                                    <Input className='rp-app-table-value' placeholder={'Add Comments'} type="textarea" rows='4' id='StatusComments' value={this.props.testcaseEdit && this.props.testcaseEdit.StatusChangeComments}
-                                                        onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, StatusChangeComments: e.target.value, errors: { ...this.props.testcaseEdit.errors, StatusChangeComments: null } })} >
-
-                                                    </Input>
-                                                }
-                                            </FormGroup>
-                                }
-
-                            </Collapse>
-                        </Col>
-                    </FormGroup> */}
                     <div>TC Information</div>
                     <FormGroup row className="my-0" style={{ marginTop: '1rem' }}>
                         {/* add or remove if there are errors */}
 
                         {
-                            this.props.currentUser && this.props.currentUser.isAdmin &&
+                            this.props.currentUser && this.props.currentUser.isAdmin && displayFields.includes('NewTcID') &&
                             [
                                 { field: 'NewTcID', header: 'New Tc ID', type: 'text', restrictWidth: false },
 
@@ -291,9 +201,10 @@ class EditTC extends Component {
                                             <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors[item.field]}</i>
                                         }</Label>
                                         {
-                                            !this.props.isEditing ?
+                                            (!this.props.isEditing || !editFields.includes(item.field)) &&
                                                 <div key={index} className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail[item.field]}</span></div>
-                                                :
+                                            }
+                                            {   this.props.isEditing && editFields.includes(item.field) && 
                                                 <Input style={{ borderColor: this.props.testcaseEdit.errors[item.field] ? 'red' : '' }} key={index} className='rp-app-table-value' type="text" placeholder={`Add ${item.header}`} id={item.field} name={item.field} value={this.props.testcaseEdit && this.props.testcaseEdit[item.field]}
                                                     onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, [item.field]: e.target.value, errors: { ...this.props.testcaseEdit.errors, [item.field]: null } })} >
 
@@ -303,11 +214,14 @@ class EditTC extends Component {
                                 </Col>
                             ))
                         }
-                        {
+                        {  
                             [
                                 { field: 'Assignee', header: 'Assignee' },
+                                { field: 'AutoAssignee', header: 'Auto Assignee' },
+                                { field: 'DevAssignee', header: 'Dev Assignee' },
                                 // { field: 'Status', header: 'Status' },
                             ].map(item => (
+                                displayFields.includes(item.field) && 
                                 <Col xs="12" md="6" lg="6">
                                     <FormGroup className='rp-app-table-value'>
                                         <Label className='rp-app-table-label' htmlFor={item.field}>{item.header} {
@@ -315,9 +229,10 @@ class EditTC extends Component {
                                             <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors[item.field]}</i>
                                         }</Label>
                                         {
-                                            !this.props.isEditing ?
+                                            (!this.props.isEditing || !editFields.includes(item.field)) &&
                                                 <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail[item.field]}</span></div>
-                                                :
+                                        }
+                                        {   this.props.isEditing && editFields.includes(item.field) && 
                                                 <Input style={{ borderColor: this.props.testcaseEdit.errors[item.field] ? 'red' : '' }} className='rp-app-table-value' type="select" id={item.field} name={item.field} value={this.props.testcaseEdit && this.props.testcaseEdit[item.field]} onChange={(e) =>
                                                     this.props.updateTCEdit(
                                                         {
@@ -396,6 +311,7 @@ class EditTC extends Component {
                                         { field: 'Scenario', header: 'Scenario', type: 'text' },
 
                                     ].map((item, index) => (
+                                        displayFields.includes(item.field) &&
                                         <Col xs="12" md="6" lg="6">
                                             <FormGroup className='rp-app-table-value'>
                                                 <Label className='rp-app-table-label' htmlFor={item.field}>{item.header}  {
@@ -403,9 +319,10 @@ class EditTC extends Component {
                                                     <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors[item.field]}</i>
                                                 }</Label>
                                                 {
-                                                    !this.props.isEditing ?
+                                                    (!this.props.isEditing || !editFields.includes(item.field)) &&
                                                         <div key={index} className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail[item.field]}</span></div>
-                                                        :
+                                                }
+                                                { this.props.isEditing && editFields.includes(item.field) &&
                                                         <Input style={{ borderColor: this.props.testcaseEdit.errors[item.field] ? 'red' : '' }} key={index} className='rp-app-table-value' type="text" placeholder={`Add ${item.header}`} id={item.field} name={item.field} value={this.props.testcaseEdit && this.props.testcaseEdit[item.field]}
                                                             onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, [item.field]: e.target.value, errors: { ...this.props.testcaseEdit.errors, [item.field]: null } })} >
 
@@ -466,6 +383,8 @@ class EditTC extends Component {
                                         }
                                     </FormGroup>
                                 </Col> */}
+                                {
+                                       displayFields.includes('Priority') &&
                                 <Col xs="12" md="6" lg="6">
                                     <FormGroup className='rp-app-table-value'>
                                         <Label className='rp-app-table-label' htmlFor='Master' >Priority {
@@ -473,9 +392,10 @@ class EditTC extends Component {
                                             <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors.Priority}</i>
                                         }</Label>
                                         {
-                                            !this.props.isEditing ?
+                                            (!this.props.isEditing || !editFields.includes('Priority')) &&
                                                 <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail.Priority}</span></div>
-                                                :
+                                        }
+                                        {   this.props.isEditing && editFields.includes('Priority') &&
                                                 <Input style={{ borderColor: this.props.testcaseEdit.errors.Priority ? 'red' : '' }} className='rp-app-table-value' type="select" id="Priority" name="Priority" value={this.props.testcaseEdit && this.props.testcaseEdit.Priority}
                                                     onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, Priority: e.target.value, errors: { ...this.props.testcaseEdit.errors, Priority: null } })} >
                                                     <option value=''>Select Priority</option>
@@ -488,6 +408,9 @@ class EditTC extends Component {
                                         }
                                     </FormGroup>
                                 </Col>
+                                }
+                                {
+                                    displayFields.includes('Tag') &&
                                 <Col xs="12" md="6" lg="6">
                                     <FormGroup className='rp-app-table-value'>
                                         <Label className='rp-app-table-label' htmlFor='TAG'>Tag {
@@ -495,9 +418,10 @@ class EditTC extends Component {
                                             <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors.Tag}</i>
                                         }</Label>
                                         {
-                                            !this.props.isEditing ?
+                                            (!this.props.isEditing || !editFields.includes('Tag')) &&
                                                 <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail.Tag}</span></div>
-                                                :
+                                        }
+                                        {   this.props.isEditing && editFields.includes('Tag') &&
                                                 <Input style={{ borderColor: this.props.testcaseEdit.errors.Tag ? 'red' : '' }} className='rp-app-table-value' type="select" id="TAG" name="TAG" value={this.props.testcaseEdit && this.props.testcaseEdit.Tag}
                                                     onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, Tag: e.target.value, errors: { ...this.props.testcaseEdit.errors, Tag: null } })} >
                                                     <option value=''>Select Tag</option>
@@ -508,16 +432,20 @@ class EditTC extends Component {
                                         }
                                     </FormGroup>
                                 </Col>
+                                }
+                                  {
+                                    displayFields.includes('WorkingStatus') &&
                                 <Col xs="12" md="6" lg="6">
                                     <FormGroup className='rp-app-table-value'>
                                         <Label className='rp-app-table-label' htmlFor='WorkingStatus'>Working Status {
                                             this.props.testcaseEdit.errors.WorkingStatus &&
                                             <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.testcaseEdit.errors.WorkingStatus}</i>
                                         }</Label>
-                                        {
-                                            !this.props.isEditing ?
+                                          {
+                                            (!this.props.isEditing || !editFields.includes('WorkingStatus')) &&
                                                 <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail.WorkingStatus}</span></div>
-                                                :
+                                            }
+                                            {   this.props.isEditing && editFields.includes('WorkingStatus') &&
                                                 <Input style={{ borderColor: this.props.testcaseEdit.errors.WorkingStatus ? 'red' : '' }} className='rp-app-table-value' type="select" id="WorkingStatus" name="WorkingStatus" value={this.props.testcaseEdit && this.props.testcaseEdit.WorkingStatus}
                                                     onChange={(e) => this.props.updateTCEdit({ ...this.props.testcaseEdit, WorkingStatus: e.target.value, errors: { ...this.props.testcaseEdit.errors, WorkingStatus: null } })} >
                                                     <option value=''>Select Working Status</option>
@@ -526,10 +454,11 @@ class EditTC extends Component {
                                                         ws.map(item => <option value={item}>{item}</option>)
                                                     }
                                                 </Input>
-                                        }
+                                            }
+                                        
                                     </FormGroup>
                                 </Col>
-
+    }
 
 
                             </React.Fragment>
@@ -548,7 +477,7 @@ const mapStateToProps = (state, ownProps) => ({
     testcaseDetail: state.testcase.testcaseDetail,
     testcaseEdit: state.testcase.testcaseEdit
 })
-export default connect(mapStateToProps, { saveTestCase, saveTestCaseStatus, saveSingleTestCase, updateTCEdit })(EditTC);
+export default connect(mapStateToProps, { saveTestCase, saveTestCaseStatus, saveSingleTestCase, updateTCEdit })(EditTCLifeCycle);
 
 
 
