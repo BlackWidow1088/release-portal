@@ -157,22 +157,22 @@ class EditTC extends Component {
                                     }
                                 </FormGroup>
                             </Col>
-                            {/* <Col xs="12" md="6" lg="6">
+                            <Col xs="12" md="6" lg="6">
                                 <FormGroup className='rp-app-table-value'>
-                                    <Label className='rp-app-table-label' htmlFor="Card Type">
-                                        Card Type
+                                    <Label className='rp-app-table-label' htmlFor="Bugs">
+                                        Bug Number
                                                      </Label>
                                     {
-                                        // !this.props.isEditing ? 
-                                        <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail.CardType}</span></div>
-                                        //  <Input placeholder='Build Number' value={this.props.testcaseEdit && this.props.testcaseEdit.Build} onChange={(e) => this.props.updateTCEdit({
-                                        //             ...this.props.testcaseEdit, Build: e.target.value,
-                                        //             errors: { ...this.props.testcaseEdit.errors, Build: null }
-                                        //             })}  type="input" >
-                                        //  </Input>
+                                        !this.props.isEditing ? 
+                                        <div className='rp-app-table-value'><span className='rp-edit-TC-span'>{this.props.testcaseDetail && this.props.testcaseDetail.Bugs}</span></div> :
+                                         <Input placeholder='Bug Number' value={this.props.testcaseEdit && this.props.testcaseEdit.Bugs} onChange={(e) => this.props.updateTCEdit({
+                                                    ...this.props.testcaseEdit, Bugs: e.target.value,
+                                                    errors: { ...this.props.testcaseEdit.errors, Bugs: null }
+                                                    })}  type="input" >
+                                         </Input>
                                     }
                                 </FormGroup>
-                            </Col> */}
+                            </Col>
 
                         </FormGroup>
                     }

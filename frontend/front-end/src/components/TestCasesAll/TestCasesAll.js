@@ -116,6 +116,10 @@ class TestCasesAll extends Component {
                     }
                 },
                 {
+                    headerName: "Bug", field: "CurrentStatus.Bugs", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
+                    cellClass: 'cell-wrap-text'
+                },
+                {
                     headerName: "Priority", field: "Priority", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
                 },
                 {
@@ -191,6 +195,9 @@ class TestCasesAll extends Component {
             },
             {
                 headerName: "Result", field: "Result", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+            },
+            {
+                headerName: "Bugs", field: "Bugs", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
             },
             {
                 headerName: "Date", field: "Date", sortable: true, filter: true,
@@ -532,7 +539,8 @@ class TestCasesAll extends Component {
                             let stats = res.data.StatusList[res.data.StatusList.length -1];
                             let CurrentStatus = {
                                 Build: `${stats.Build}`,
-                                Result: `${stats.Result}`
+                                Result: `${stats.Result}`,
+                                Bugs: `${stats.Bugs}`
                             };
                             res.data.CurrentStatus = CurrentStatus;
                         }
@@ -727,7 +735,7 @@ class TestCasesAll extends Component {
 
     textFields = [
         'TcID', 'TcName', 'Scenario', 'Tag', 'Assignee', 'Tag', 'Priority',
-        'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'WorkingStatus'
+        'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'WorkingStatus', 'Bugs'
     ];
     whichFieldsUpdated(old, latest) {
         let changes = {};
@@ -781,6 +789,7 @@ class TestCasesAll extends Component {
         status.TcName = this.props.tcDetails.TcName;
         status.Build = this.props.testcaseEdit.Build;
         status.Result = this.props.testcaseEdit.CurrentStatus;
+        status.Bugs = this.props.testcaseEdit.Bugs;
         status.CardType = this.props.tcDetails.CardType;
         status.TcID = this.props.tcDetails.TcID;
         status.Activity = {
@@ -910,7 +919,7 @@ class TestCasesAll extends Component {
             if (this.props.selectedRelease && this.props.selectedRelease.TcAggregate) {
                 let tcAggr = this.props.selectedRelease.TcAggregate.all;
                 pass = tcAggr.Tested.manual.Pass + tcAggr.Tested.auto.Pass;
-                automated = tcAggr.all.Automated;
+                automated = tcAggr.Automated;
                 fail = tcAggr.Tested.manual.Fail + tcAggr.Tested.auto.Fail;
                 total = pass + fail + tcAggr.Tested.manual.Skip + tcAggr.Tested.auto.Skip + tcAggr.NotTested + tcAggr.NotApplicable
             }

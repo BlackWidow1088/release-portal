@@ -818,7 +818,7 @@ class ReleaseSummary extends Component {
                             <tbody>
                                 {
                                     <tr>
-                                        <td className='rp-app-table-key'>Test Cases</td>
+                                        <td className='rp-app-table-key'>Test Cases (All)</td>
                                      
                                         <td>
                                         <table>
@@ -826,6 +826,24 @@ class ReleaseSummary extends Component {
                                         <tr>
                                         <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0}</span></td>
                                         <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.totalGUI : 0}</span></td>
+                                            {/* <span>(P0: {this.props.selectedRelease.P0},</span>
+                                            <span>P1: {this.props.selectedRelease.P1},</span>
+                                            <span>P2: {this.props.selectedRelease.P2})</span> */}
+                                            </tr>
+                                        </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                }
+                                                                                                {
+                                    <tr>
+                                        <td className='rp-app-table-key'>Test Cases Not Applicable</td>
+                                        <td>
+                                        <table>
+                                        <tbody>
+                                        <tr>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.notApplicable : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUINotApplicable : 0}</span></td>
                                             {/* <span>(P0: {this.props.selectedRelease.P0},</span>
                                             <span>P1: {this.props.selectedRelease.P1},</span>
                                             <span>P2: {this.props.selectedRelease.P2})</span> */}
@@ -862,24 +880,6 @@ class ReleaseSummary extends Component {
                                         <tr>
                                         <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.skipped : 0}</span></td>
                                         <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUISkip : 0}</span></td>
-                                            {/* <span>(P0: {this.props.selectedRelease.P0},</span>
-                                            <span>P1: {this.props.selectedRelease.P1},</span>
-                                            <span>P2: {this.props.selectedRelease.P2})</span> */}
-                                            </tr>
-                                        </tbody>
-                                        </table>
-                                        </td>
-                                    </tr>
-                                }
-                                                                {
-                                    <tr>
-                                        <td className='rp-app-table-key'>Test Cases Not Applicable</td>
-                                        <td>
-                                        <table>
-                                        <tbody>
-                                        <tr>
-                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.notApplicable : 0}</span></td>
-                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUINotApplicable : 0}</span></td>
                                             {/* <span>(P0: {this.props.selectedRelease.P0},</span>
                                             <span>P1: {this.props.selectedRelease.P1},</span>
                                             <span>P2: {this.props.selectedRelease.P2})</span> */}
