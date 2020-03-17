@@ -91,11 +91,13 @@ class DefaultLayout extends Component {
     this.stopPolling();
     if (this.props.currentUser) {
       this.props.clearUserData();
-      // this.props.history.push('/login')
+
       if (this.GoogleAuth) {
         this.GoogleAuth.signOut().then(() => {
           this.props.history.push('/login')
         })
+      } else {
+      this.props.history.push('/login')
       }
 
     } else {
@@ -121,7 +123,7 @@ class DefaultLayout extends Component {
   }
   componentDidMount() {
     // this.props.logInSuccess({ email: 'yatish@diamati.com', isAdmin: true, role: 'ADMIN', name: 'Yatish' });
-    // this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
+    this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
     gapi.load('auth2', () => {
       let auth2 = gapi.auth2.init({
         'apiKey': 'AIzaSyAxV1LfUI_TIjiQ2b8rW0fVYdMwHPeKQTYY',

@@ -70,7 +70,6 @@ class TestCases extends Component {
                     width: '420',
                     editable: false,
                     cellClass: 'cell-wrap-text',
-                    autoHeight: true
                 },
                 {
                     headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',

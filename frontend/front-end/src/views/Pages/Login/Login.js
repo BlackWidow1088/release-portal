@@ -40,8 +40,8 @@ class Login extends Component {
   }
   //a1xGwnaKFGC2A55Cy72bxMq1
   componentDidMount() {
-    // this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
-    // this.props.history.push('/');
+    this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
+    this.props.history.push('/');
     window.gapi.load('auth2', () => {
 
       console.log('inside load')
@@ -49,13 +49,13 @@ class Login extends Component {
       // this.GoogleAuth.isSignedIn.listen((data) => this.setSigninStatus(data));
       this.auth2 = gapi.auth2.init({
         // 'apiKey': 'AIzaSyCswiq9I_E8n2bgQ5IYZhb7jQvERX8pUJs',
-        'apiKey': 'AIzaSyCswiq9I_E8n2bgQ5IYZhb7jQvERX8pUJs',
+        'apiKey': 'AIzaSyAxV1LfUI_TIjiQ2b8rW0fVYdMwHPeKQTY',
         // client_id: '271454306292-sm8tpgju5dkupvnunqmnfiuk0hej3e4l.apps.googleusercontent.com',
         //secret: dJ8apT9Nx0HIe97MOotO9W1K
         // client_id: '271454306292-fnma4vrg7dssj2opv4jovof9v8uq8n1l.apps.googleusercontent.com',
         client_id: '271454306292-qkakko84sergf5vcrm68uqodf9495mum.apps.googleusercontent.com',
         'scope': this.SCOPE,
-        // 'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
       }).then(() => {
         this.GoogleAuth = gapi.auth2.getAuthInstance();
         this.setState({ googleAuthLoaded: true })

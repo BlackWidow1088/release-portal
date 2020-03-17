@@ -73,7 +73,6 @@ class TestCasesAll extends Component {
                         return true;
                     },
                     headerCheckboxSelectionFilteredOnly: true,
-                    cellStyle: { alignItems: 'top' },
                     checkboxSelection: true,
                     headerName: "TcID", field: "TcID", sortable: true, filter: true, cellStyle: this.renderEditedCell,
                     editable: false,
@@ -81,10 +80,9 @@ class TestCasesAll extends Component {
                 },
                 {
                     headerName: "Description", field: "Description", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                    width: '420',
+                    width: '520',
                     editable: false,
                     cellClass: 'cell-wrap-text',
-                    autoHeight: true
                 },
                 {
                     headerName: "CardType", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
@@ -138,34 +136,34 @@ class TestCasesAll extends Component {
                 {
                     headerName: "TcName", field: "TcName", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                 },
-                {
-                    headerName: "Domain", field: "Domain", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
-                {
-                    headerName: "SubDomain", field: "SubDomain", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
-                {
-                    headerName: "Scenario", field: "Scenario", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
-                {
-                    headerName: "ExpectedBehaviour", field: "ExpectedBehaviour", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
-                {
-                    headerName: "Steps", field: "Steps", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
-                {
-                    headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
-                {
-                    headerName: "Tag", field: "Tag", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    hide: true,
-                },
+                // {
+                //     headerName: "Domain", field: "Domain", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
+                // {
+                //     headerName: "SubDomain", field: "SubDomain", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
+                // {
+                //     headerName: "Scenario", field: "Scenario", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
+                // {
+                //     headerName: "ExpectedBehaviour", field: "ExpectedBehaviour", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
+                // {
+                //     headerName: "Steps", field: "Steps", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
+                // {
+                //     headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
+                // {
+                //     headerName: "Tag", field: "Tag", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     hide: true,
+                // },
             ],
 
 //             TcID: "PVC_Rbac_S-2.1"
@@ -229,10 +227,10 @@ class TestCasesAll extends Component {
     }
     getRowHeight = (params) => {
         if (params.data && params.data.Description) {
-            return 29 * (Math.floor(params.data.Description.length / 60) + 1);
+            return 28 * (Math.floor(params.data.Description.length / 60) + 2);
         }
         // assuming 50 characters per line, working how how many lines we need
-        return 30;
+        return 28;
     }
     getActivityRowHeight = (params) => {
         if (params.data && params.data.LogData) {

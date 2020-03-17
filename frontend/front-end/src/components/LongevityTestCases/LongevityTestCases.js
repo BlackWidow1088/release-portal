@@ -36,6 +36,7 @@ class LongevityTestCases extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            sanityDetails: null, 
             selectedRows: 0,
             totalRows: 0,
             allRows: 0,
@@ -177,13 +178,13 @@ class LongevityTestCases extends Component {
                     width:80
 
                 },
-                {
-                    headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    width: '420',
-                    editable: true,
-                    cellClass: 'cell-wrap-text',
-                    autoHeight: true
-                },
+                // {
+                //     headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     width: '420',
+                //     editable: true,
+                //     cellClass: 'cell-wrap-text',
+                //     autoHeight: true
+                // },
 
             ],
             defaultColDef: { resizable: true },
@@ -299,7 +300,7 @@ class LongevityTestCases extends Component {
             NoOfDuration: each.NoOfDuration,
             User:each.User,
             CardType:each.CardType,
-            Notes:each.Notes, 
+            Notes: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.Notes : each.Notes,
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -349,7 +350,7 @@ class LongevityTestCases extends Component {
             NoOfDuration: each.NoOfDuration,
             User:each.User,
             CardType:each.CardType,
-            Notes:each.Notes, 
+            Notes: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.Notes : each.Notes,
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -380,7 +381,19 @@ class LongevityTestCases extends Component {
     }
 
     onSelectionChanged = (event) => {
-        this.setState({ selectedRows: event.api.getSelectedRows().length })
+        if(event.api.getSelectedRows().length !== 1) {
+            this.setState({sanityDetails: null, isEditing: false, selectedRows: event.api.getSelectedRows().length})
+        } else {
+            let row = event.api.getSelectedRows()[0];
+            if(row) {
+                this.setState({selectedRows: 1, sanityDetails: {
+                    ...row, oldNotes: row.Notes+''
+                }})
+            } else {
+                this.setState({sanityDetails: null, isEditing: false, selectedRows: event.api.getSelectedRows().length})
+            }
+
+        }
     }
     deselect(updateTotalRows) {
         this.editedRows = {};
@@ -452,12 +465,14 @@ class LongevityTestCases extends Component {
     toggleDelete = () => {
         this.setState({ delete: !this.state.delete })
     };
-    rowSelect(e) {
-        this.setState({
-            isEditing: false, rowSelect: true, toggleMessage: null, allRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0,
-            selectedRows: this.gridApi.getSelectedRows().length, totalRows: this.gridApi.getModel().rowsToDisplay.length
-        })
-        // this.getTC(e.data);
+    rowSelect(row) {
+        this.currentSelectedRow = row;
+        let data = row.data
+        if (!this.props.selectedRelease.ReleaseNumber) {
+            return;
+        }
+        data.oldNotes = data.Notes+'';
+        this.setState({sanityDetails: data, rowSelect: true});
     }
 
     getTcs(selectedRelease) {
@@ -595,6 +610,10 @@ class LongevityTestCases extends Component {
         d = new Date(date).toISOString().split('T');
         return `${d[0]}`;
     }
+    resetSingle() {
+        this.setState({ isEditing: false, sanityDetails: {...this.state.sanityDetails,
+            Notes: this.state.sanityDetails.oldNotes+'' } });
+    }
     render() {
         console.log('rendering')
         console.log(this.props.data)
@@ -648,7 +667,7 @@ class LongevityTestCases extends Component {
                     } */}
                 </div>
                 <div>
-                    <div style={{ width: '100%', height: '400px', marginBottom: '6rem' }}>
+                    <div style={{ width: '100%', height: '500px', marginBottom: '2rem' }}>
                         <div style={{ width: "100%", height: "100%" }}>
                             <div
                                 id="myGrid"
@@ -661,8 +680,8 @@ class LongevityTestCases extends Component {
                                 <AgGridReact
                                     // suppressScrollOnNewData={true}
                                     onSelectionChanged={(e) => this.onSelectionChanged(e)}
+                                    onRowClicked={(e) => this.rowSelect(e)}
                                     rowStyle={{ alignItems: 'top' }}
-                                    // onRowClicked={(e) => this.rowSelect(e)}
                                     modules={this.state.modules}
                                     columnDefs={this.state.columnDefs}
                                     rowSelection='multiple'
@@ -683,105 +702,55 @@ class LongevityTestCases extends Component {
 
 
                     </div>
-                    <Collapse isOpen={this.state.rowSelect}>
-                        {
-                            this.props.user && this.props.user.email && this.props.E2EDetails && this.props.E2EDetails.Type &&
-                            <React.Fragment>
-                                {
-                                    this.state.isEditing ?
-                                        <Fragment>
-                                            <Button title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmToggle()} >
-                                                <i className="fa fa-save"></i>
-                                            </Button>
-                                            <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.reset()} >
-                                                <i className="fa fa-undo"></i>
-                                            </Button>
-                                        </Fragment>
-                                        :
-                                        <Fragment>
-
-                                            {/* <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.toggleDelete()} >
-                                                            <i className="fa fa-trash-o"></i>
-                                                        </Button> */}
-                                            <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.setState({ isEditing: true })} >
-                                                <i className="fa fa-pencil-square-o"></i>
-                                            </Button>
-                                        </Fragment>
-
-                                }
-                            </React.Fragment>
-                        }
-                        {
-                            this.props.E2EDetails && this.props.E2EDetails.Type &&
-                            <React.Fragment>
-                                <FormGroup row className="my-0">
-                                    {
-                                        [
-
-                                            { field: 'Description', header: 'Description', type: 'text' },
-                                            { field: 'Steps', header: 'Steps', type: 'text' },
-                                            { field: 'ExpectedBehaviour', header: 'Expected Behaviour', type: 'text' },
-                                            { field: 'Notes', header: 'Notes', type: 'text' },
-
-                                        ].map((item, index) => (
-                                            <Col xs="12" md="6" lg="6">
-                                                <FormGroup className='rp-app-table-value'>
-                                                    <Label className='rp-app-table-label' htmlFor={item.field}>{item.header} {
-                                                        this.props.E2EEdit.errors.Master &&
-                                                        <i className='fa fa-exclamation-circle rp-error-icon'>{this.props.E2EEdit.errors.Master}</i>
-                                                    }</Label>
-                                                    {
-                                                        !this.state.isEditing ?
-                                                            <Input style={{ borderColor: this.props.E2EEdit.errors[item.field] ? 'red' : '', backgroundColor: 'white' }} className='rp-app-table-value' type='textarea' rows={this.getTextAreaHeight(this.props.E2EDetails && this.props.E2EDetails[item.field])} value={this.props.E2EDetails && this.props.E2EDetails[item.field]}></Input>
-                                                            :
-                                                            <Input style={{ borderColor: this.props.E2EEdit.errors[item.field] ? 'red' : '' }} className='rp-app-table-value' placeholder={'Add ' + item.header} type="textarea" rows={this.getTextAreaHeight(this.props.E2EDetails && this.props.E2EDetails[item.field])} id={item.field} value={this.props.E2EEdit && this.props.E2EEdit[item.field]}
-                                                                onChange={(e) => this.props.updateE2EEdit({
-                                                                    ...this.props.E2EEdit, [item.field]: e.target.value,
-                                                                    errors: { ...this.props.E2EEdit.errors, [item.field]: null }
-                                                                })} >
-
-                                                            </Input>
-                                                    }
-                                                </FormGroup>
-                                            </Col>
-                                        ))
-                                    }
-                                </FormGroup>
-
-
-
-
-                                <Row>
-                                    <Col lg="12">
-                                        <div className='rp-app-table-title'>Test Case History</div>
-                                        {/* <div style={{ width: (window.screen.width * ((1 - 0.418) / 2)) + 'px', height: '150px', marginBottom: '3rem' }}> */}
-                                        <div style={{ width: '100%', height: '250px', marginBottom: '3rem' }}>
-                                            <div style={{ width: "100%", height: "100%" }}>
-                                                <div
-                                                    id="activityGrid"
-                                                    style={{
-                                                        height: "100%",
-                                                        width: "100%",
-                                                    }}
-                                                    className="ag-theme-balham"
-                                                >
-                                                    <AgGridReact
-                                                        onRowClicked={(e) => this.setState({ activity: e.data })}
-                                                        modules={this.state.modules}
-                                                        getRowHeight={this.getActivityRowHeight}
-                                                        columnDefs={this.state.activityColumnDefs}
-                                                        defaultColDef={this.state.defaultColDef}
-                                                        rowData={this.props.E2EDetails ? this.props.E2EDetails.Activity : []}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </React.Fragment>
-                        }
-                    </Collapse>
                 </div >
+                <div>Select only one test case to view Notes</div>
+                {
+                                        this.props.user && this.props.user.email && this.state.sanityDetails && 
+                                        <React.Fragment>
+                                            {
+                                               this.state.isEditing &&
+                                                <Fragment>
+                                                    <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.resetSingle()} >
+                                                        <i className="fa fa-undo"></i>
+                                                    </Button>
+                                                </Fragment>
+                                            }
+                                            {!this.state.isEditing &&
+                                                <Fragment>
+                                                    <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.setState({ isEditing: true })} >
+                                                        <i className="fa fa-pencil-square-o"></i>
+                                                    </Button>
+                                                </Fragment>
+
+                                            }
+                                        </React.Fragment>
+                                    }
+                {
+                    this.state.sanityDetails && 
+                <FormGroup row className="my-0">
+                                                {
+                                                    [
+                                                        { field: 'Notes', header: 'Notes', type: 'text', size:"12" },
+                                                    ].map((item, index) => (
+                                                        <Col xs="12" md={item.size}  lg={item.size}>
+                                                            <FormGroup className='rp-app-table-value'>
+                                                                <Label className='rp-app-table-label' htmlFor={item.field}>{item.header}</Label>
+                                                                {
+                                                                    !this.state.isEditing ?
+                                                                        <Input style={{ backgroundColor: 'white' }} className='rp-app-table-value' type='textarea' rows={this.getTextAreaHeight(this.state.sanityDetails && this.state.sanityDetails[item.field])} value={this.state.sanityDetails && this.state.sanityDetails[item.field]}></Input>
+                                                                        :
+                                                                        <Input className='rp-app-table-value' placeholder={'Add ' + item.header} type="textarea" rows={this.getTextAreaHeight(this.state.sanityDetails && this.state.sanityDetails[item.field])} id={item.field} value={this.state.sanityDetails && this.state.sanityDetails[item.field]}
+                                                                            onChange={(e) => this.setState({
+                                                                                sanityDetails: {...this.state.sanityDetails, [item.field]: e.target.value}
+                                                                            })} >
+                                                                        </Input>
+                                                                }
+                                                            </FormGroup>
+                                                        </Col>
+                                                    ))
+                                                }
+                                            </FormGroup>
+    }
 
 
 

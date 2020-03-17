@@ -36,6 +36,7 @@ class E2ETestCases extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            sanityDetails: null, 
             selectedRows: 0,
             totalRows: 0,
             allRows: 0,
@@ -79,12 +80,14 @@ class E2ETestCases extends Component {
                 {
                     headerName: "OrchestrationPlatform", field: "OrchestrationPlatform", sortable: true, filter: true, cellStyle: this.renderEditedCell,
                 },
-                {
-                    headerName: "Description", field: "Description", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
-                {
-                    headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell,
-                },
+                // {
+                //     headerName: "Description", field: "Description", sortable: true, filter: true, cellStyle: this.renderEditedCell,
+                //     width: 520
+                // },
+                // {
+                //     headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell,
+                //     width: 520
+                // },
                 {
                     headerName: "Steps", field: "Steps", sortable: true, filter: true, cellStyle: this.renderEditedCell,
                 },
@@ -145,7 +148,7 @@ class E2ETestCases extends Component {
                 {
                     headerName: "Bug", field: "Bug",
                      editable: true, 
-                     sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
+                     sortable: true, filter: true, cellStyle: this.renderEditedCell, width: 100, cellClass: 'cell-wrap-text',
                 },
                 {
                     headerName: "Passed Tcs", field: "NoOfTCsPassed", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100',
@@ -154,16 +157,16 @@ class E2ETestCases extends Component {
                     filter: 'agNumberColumnFilter',
                     editable: true,
                 },
-                {
-                    headerName: "E2EFocus", field: "E2EFocus", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '420',
-                    cellClass: 'cell-wrap-text',
-                    editable: true,
-                },
-                {
-                    headerName: "E2ESkipList", field: "E2ESkipList", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '420',
-                    cellClass: 'cell-wrap-text',
-                    editable: true,
-                },
+                // {
+                //     headerName: "E2EFocus", field: "E2EFocus", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: 520,
+                //     cellClass: 'cell-wrap-text',
+                //     editable: true,
+                // },
+                // {
+                //     headerName: "E2ESkipList", field: "E2ESkipList", sortable: true, filter: true, cellStyle: this.renderEditedCell, width: 520,
+                //     cellClass: 'cell-wrap-text',
+                //     editable: true,
+                // },
 
                 {
                     headerName: "Card Type", field: "CardType", sortable: true, filter: true, cellStyle: this.renderEditedCell,width: '100',
@@ -183,13 +186,13 @@ class E2ETestCases extends Component {
                         values: ['Select Assignee', 'Jenkin', ...this.props.users]
                     }
                 },
-                {
-                    headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    width: '420',
-                    editable: true,
-                    cellClass: 'cell-wrap-text',
-                    autoHeight: true
-                },
+                // {
+                //     headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                //     width: 520,
+                //     editable: true,
+                //     cellClass: 'cell-wrap-text',
+                //     autoHeight: true
+                // },
 
             ],
             defaultColDef: { resizable: true },
@@ -233,22 +236,40 @@ class E2ETestCases extends Component {
         this.getTcs();
     }
 
-    getRowHeight = (params) => {
-        let noteHeight = 0, e2eFocus = 0, skipList = 0;
-        if (params.data && params.data.Notes) {
-            noteHeight = 28 * (Math.floor(params.data.Notes.length / 60) + 1)
-        }
-        if (params.data && params.data.E2EFocus) {
-            e2eFocus = 28 * (Math.floor(params.data.E2EFocus.length / 60) + 1)
-        }
-        if (params.data && params.data.E2ESkipList) {
-            skipList = 28 * (Math.floor(params.data.E2ESkipList.length / 60) + 1)
+    getTextAreaHeight = data => {
+        if (data) {
+            let rows = (Math.floor(data.length / 40) + 1);
+            if (rows < 2) {
+                return 2;
+            } else {
+                return rows;
+            }
         }
         // assuming 50 characters per line, working how how many lines we need
-        if(noteHeight +e2eFocus+skipList === 0) {
-            return 28;
+        return 2;
+    }
+
+    getRowHeight = (params) => {
+        // let noteHeight = 0, e2eFocus = 0, skipList = 0;
+        // if (params.data && params.data.Notes) {
+        //     noteHeight = 28 * (Math.floor(params.data.Notes.length / 60) + 1)
+        // }
+        // if (params.data && params.data.E2EFocus) {
+        //     e2eFocus = 28 * (Math.floor(params.data.E2EFocus.length / 60) + 1)
+        // }
+        // if (params.data && params.data.E2ESkipList) {
+        //     skipList = 28 * (Math.floor(params.data.E2ESkipList.length / 60) + 1)
+        // }
+        // // assuming 50 characters per line, working how how many lines we need
+        // if(noteHeight +e2eFocus+skipList === 0) {
+        //     return 28;
+        // }
+        // return Math.max(noteHeight, e2eFocus, skipList);
+        if (params.data && params.data.LogData) {
+            return 28 * (Math.floor(params.data.LogData.length / 60) + 1);
         }
-        return Math.max(noteHeight, e2eFocus, skipList);
+        // assuming 50 characters per line, working how how many lines we need
+        return 28;
     }
     getActivityRowHeight = (params) => {
         if (params.data && params.data.LogData) {
@@ -310,10 +331,10 @@ class E2ETestCases extends Component {
             Setup: each.Setup,
             Build: each.Build,
             Bug: each.Bug,
-            E2EFocus: each.E2EFocus,
-            E2ESkipList: each.E2ESkipList,
+            E2EFocus: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2EFocus : each.E2EFocus,
+            E2ESkipList: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2ESkipList : each.E2ESkipList,
             NoOfTCsPassed: each.NoOfTCsPassed,
-            Notes: each.Notes,
+            Notes: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.Notes : each.Notes,
             User: each.User,
             Result: `${each.Result}`,
             CardType: `${each.CardType}`, 
@@ -368,13 +389,14 @@ class E2ETestCases extends Component {
             Setup: each.Setup,
             Build: each.Build,
             Bug: each.Bug,
-            E2EFocus: each.E2EFocus,
-            E2ESkipList: each.E2ESkipList,
+            E2EFocus: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2EFocus : each.E2EFocus,
+            E2ESkipList: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2ESkipList : each.E2ESkipList,
             NoOfTCsPassed: each.NoOfTCsPassed,
             Notes: each.Notes,
             User: each.User,
             Result: `${each.Result}`,
             CardType: `${each.CardType}`, 
+            Notes: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.Notes : each.Notes,
             Activity: {
                 Release: this.props.selectedRelease.ReleaseNumber,
                 "TcID": each.id,
@@ -466,6 +488,21 @@ class E2ETestCases extends Component {
             }
         }
     }
+    onSelectionChanged = (event) => {
+        if(event.api.getSelectedRows().length !== 1) {
+            this.setState({sanityDetails: null, isEditing: false, selectedRows: event.api.getSelectedRows().length})
+        } else {
+            let row = event.api.getSelectedRows()[0];
+            if(row) {
+                this.setState({selectedRows: 1, sanityDetails: {
+                    ...row, oldNotes: row.Notes+'', oldE2EFocus: row.E2EFocus, oldE2ESkipList: row.E2ESkipList 
+                }})
+            } else {
+                this.setState({sanityDetails: null, isEditing: false, selectedRows: event.api.getSelectedRows().length})
+            }
+
+        }
+    }
     onFilterTextBoxChanged(value) {
         this.setState({ rowSelect: false });
         this.gridApi.setQuickFilter(value);
@@ -474,12 +511,16 @@ class E2ETestCases extends Component {
     toggleDelete = () => {
         this.setState({ delete: !this.state.delete })
     };
-    rowSelect(e) {
-        this.setState({
-            isEditing: false, rowSelect: true, toggleMessage: null, allRows: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0,
-            selectedRows: this.gridApi.getSelectedRows().length, totalRows: this.gridApi.getModel().rowsToDisplay.length
-        })
-        // this.getTC(e.data);
+    rowSelect(row) {
+        this.currentSelectedRow = row;
+        let data = row.data
+        if (!this.props.selectedRelease.ReleaseNumber) {
+            return;
+        }
+        data.oldE2EFocus = data.Description+'';
+        data.oldE2ESkipList = data.E2ESkipList+'';
+        data.oldNotes = data.Notes+'';
+        this.setState({sanityDetails: data, rowSelect: true});
     }
     getTcs(selectedRelease) {
         let release = selectedRelease ? selectedRelease : this.props.selectedRelease.ReleaseNumber;
@@ -616,6 +657,11 @@ class E2ETestCases extends Component {
         d = new Date(date).toISOString().split('T');
         return `${d[0]}`;
     }
+    resetSingle() {
+        this.setState({ isEditing: false, sanityDetails: {...this.state.sanityDetails, E2EFocus: this.state.sanityDetails.oldE2EFocus+'', 
+            E2ESkipList: this.state.sanityDetails.E2ESkipList+'', 
+            Notes: this.state.sanityDetails.oldNotes+'' } });
+    }
     render() {
         // let rowData = this.props.data.map(item => ({
         let rowData = this.props.data.filter(it => it.Tag === this.props.tag).map(item => ({
@@ -672,7 +718,7 @@ class E2ETestCases extends Component {
                     } */}
                 </div>
                 <div>
-                    <div style={{ width: '100%', height: '400px', marginBottom: '6rem' }}>
+                    <div style={{ width: '100%', height: '500px', marginBottom: '2rem' }}>
                         <div style={{ width: "100%", height: "100%" }}>
                             <div
                                 id="myGrid"
@@ -685,7 +731,8 @@ class E2ETestCases extends Component {
                                 <AgGridReact
                                     // suppressScrollOnNewData={true}
                                     rowStyle={{ alignItems: 'top' }}
-                                    // onRowClicked={(e) => this.rowSelect(e)}
+                                    onSelectionChanged={(e) => this.onSelectionChanged(e)}
+                                    onRowClicked={(e) => this.rowSelect(e)}
                                     modules={this.state.modules}
                                     columnDefs={this.state.columnDefs}
                                     rowSelection='multiple'
@@ -704,9 +751,58 @@ class E2ETestCases extends Component {
                             </div>
                         </div>
 
-
                     </div>
-                </div >
+                </div>
+                <div>Select only one test case to view Notes, E2EFocus and E2ESkipList </div>
+                {
+                                        this.props.user && this.props.user.email && this.state.sanityDetails && 
+                                        <React.Fragment>
+                                            {
+                                               this.state.isEditing &&
+                                                <Fragment>
+                                                    <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.resetSingle()} >
+                                                        <i className="fa fa-undo"></i>
+                                                    </Button>
+                                                </Fragment>
+                                            }
+                                            {!this.state.isEditing &&
+                                                <Fragment>
+                                                    <Button size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.setState({ isEditing: true })} >
+                                                        <i className="fa fa-pencil-square-o"></i>
+                                                    </Button>
+                                                </Fragment>
+
+                                            }
+                                        </React.Fragment>
+                                    }
+                {
+                    this.state.sanityDetails && 
+                <FormGroup row className="my-0">
+                                                {
+                                                    [
+                                                        { field: 'E2EFocus', header: 'E2EFocus', type: 'text', size:"6"  },
+                                                        { field: 'E2ESkipList', header: 'E2ESkipList', type: 'text', size:"6"  },
+                                                        { field: 'Notes', header: 'Notes', type: 'text', size:"12" },
+                                                    ].map((item, index) => (
+                                                        <Col xs="12" md={item.size}  lg={item.size}>
+                                                            <FormGroup className='rp-app-table-value'>
+                                                                <Label className='rp-app-table-label' htmlFor={item.field}>{item.header}</Label>
+                                                                {
+                                                                    !this.state.isEditing ?
+                                                                        <Input style={{ backgroundColor: 'white' }} className='rp-app-table-value' type='textarea' rows={this.getTextAreaHeight(this.state.sanityDetails && this.state.sanityDetails[item.field])} value={this.state.sanityDetails && this.state.sanityDetails[item.field]}></Input>
+                                                                        :
+                                                                        <Input className='rp-app-table-value' placeholder={'Add ' + item.header} type="textarea" rows={this.getTextAreaHeight(this.state.sanityDetails && this.state.sanityDetails[item.field])} id={item.field} value={this.state.sanityDetails && this.state.sanityDetails[item.field]}
+                                                                            onChange={(e) => this.setState({
+                                                                                sanityDetails: {...this.state.sanityDetails, [item.field]: e.target.value}
+                                                                            })} >
+                                                                        </Input>
+                                                                }
+                                                            </FormGroup>
+                                                        </Col>
+                                                    ))
+                                                }
+                                            </FormGroup>
+    }
             </div >
 
         )
