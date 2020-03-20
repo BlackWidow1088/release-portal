@@ -192,6 +192,9 @@ class CreateMultiple extends Component {
             "URL": `/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`
         };
         data.WorkingStatus = 'CREATED'
+        if(!data.TcName) {
+            data.TcName = 'TC NOT AUTOMATED';
+        }
 
         axios.post(`/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`, { ...data })
             .then(res => {

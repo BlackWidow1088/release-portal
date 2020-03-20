@@ -182,7 +182,9 @@ class UpdateMultiple extends Component {
             "RequestType": 'PUT',
             "URL": `/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`
         };
-        console.log(data)
+        if(!data.TcName) {
+            data.TcName = 'TC NOT AUTOMATED';
+        }
 
         axios.put(`/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`, { ...data })
             .then(res => {

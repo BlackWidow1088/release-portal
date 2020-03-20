@@ -447,9 +447,6 @@ class TestCasesLifecycle extends Component {
             url = `/dummy/api/wholetcinfo/${release}`;
         }
         if (CardType || domain || subDomain || priority) {
-            if (priority === 'Skip') {
-                priority = 'Skp';
-            }
             url = `/dummy/api/wholetcinfo/${release}?`;
             if (CardType) url += ('&CardType=' + CardType);
             if (domain) url += ('&Domain=' + domain);
@@ -516,9 +513,6 @@ class TestCasesLifecycle extends Component {
             };
             ['Priority', 'Assignee', 'WorkingStatus'].map(each => {
                 if (item[each]) {
-                    if (each === 'Priority' && item[each] === 'Skip') {
-                        item[each] = 'Skp';
-                    }
                     pushable[each] = item[each]
                     let old = item[each];
                     if (this.editedRows[`${item.TcID}_${item.CardType}`] && this.editedRows[`${item.TcID}_${item.CardType}`][each]) {
@@ -644,9 +638,6 @@ class TestCasesLifecycle extends Component {
             "RequestType": 'PUT',
             "URL": `/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${this.props.tcDetails.TcID}/card/${this.props.tcDetails.CardType}`
         };
-        if (data.Priority === 'Skip') {
-            data.Priority = 'Skp';
-        }
 
         if (this.props.testcaseEdit.CurrentStatus === 'Pass' || this.props.testcaseEdit.CurrentStatus === 'Fail') {
             this.saveSingleTCStatus(data);

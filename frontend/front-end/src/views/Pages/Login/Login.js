@@ -19,8 +19,10 @@ class Login extends Component {
     }
   }
   loginBackend(user) {
-    let email = user.w3.U3;
-    let name = user.w3.ig;
+    let email = user.Qt.zu;
+    let name = user.Qt.Ad;
+    // let email =user.w3.me
+    // let name=user.m3.bs
     axios.post('/user/login', { email: email, name: name })
       .then(res => {
         if (res.data && res.data.role === 'ADMIN') {
@@ -40,32 +42,24 @@ class Login extends Component {
   }
   //a1xGwnaKFGC2A55Cy72bxMq1
   componentDidMount() {
-    this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
-    this.props.history.push('/');
+    // this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
+    // this.props.history.push('/');
     window.gapi.load('auth2', () => {
-
-      console.log('inside load')
-
       // this.GoogleAuth.isSignedIn.listen((data) => this.setSigninStatus(data));
       this.auth2 = gapi.auth2.init({
-        // 'apiKey': 'AIzaSyCswiq9I_E8n2bgQ5IYZhb7jQvERX8pUJs',
-        'apiKey': 'AIzaSyAxV1LfUI_TIjiQ2b8rW0fVYdMwHPeKQTY',
-        // client_id: '271454306292-sm8tpgju5dkupvnunqmnfiuk0hej3e4l.apps.googleusercontent.com',
-        //secret: dJ8apT9Nx0HIe97MOotO9W1K
-        // client_id: '271454306292-fnma4vrg7dssj2opv4jovof9v8uq8n1l.apps.googleusercontent.com',
-        client_id: '271454306292-qkakko84sergf5vcrm68uqodf9495mum.apps.googleusercontent.com',
-        'scope': this.SCOPE,
-        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+        'apiKey': 'AIzaSyCx0M1qs_LyfAgVmkTmDE6qIfgUiDekM-I',
+        'client_id': '271454306292-q477q7slv0vpe1gep84habq5m2gv58k3.apps.googleusercontent.com',
+        'scope': this.SCOPE
       }).then(() => {
         this.GoogleAuth = gapi.auth2.getAuthInstance();
         this.setState({ googleAuthLoaded: true })
         this.setSigninStatus();
-      });
+      })
     });
 
   }
   setSigninStatus(isSignedIn) {
-    // console.log(isSignedIn);
+    console.log(isSignedIn);
     if (this.GoogleAuth) {
       let user = this.GoogleAuth.currentUser.get();
       let isAuthorized = user.hasGrantedScopes(this.SCOPE);
@@ -104,7 +98,7 @@ class Login extends Component {
                       this.state.googleAuthLoaded &&
                       <div style={{ textAlign: 'center' }}>
                         <GoogleLogin
-                          clientId="271454306292-qkakko84sergf5vcrm68uqodf9495mum.apps.googleusercontent.com"
+                          clientId="271454306292-q477q7slv0vpe1gep84habq5m2gv58k3.apps.googleusercontent.com"
                           buttonText="Login"
                           onSuccess={(d) => this.setSigninStatus(d)}
                           onFailure={(f) => this.onLoginFailed(f)}

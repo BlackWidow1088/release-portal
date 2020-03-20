@@ -16,7 +16,6 @@
 // yatish checking
 
 
-/* global gapi */
 import React, { Component, Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import * as router from 'react-router-dom';
@@ -40,7 +39,7 @@ import {
 // routes config
 import routes from '../../routes';
 import { connect } from 'react-redux';
-import { saveUsers, saveReleaseBasicInfo, releaseChange, saveTestCase, saveTestCaseStatus, logInSuccess, clearUserData, fetchUserNotifications } from '../../actions';
+import { logOut, saveUsers, saveReleaseBasicInfo, releaseChange, saveTestCase, saveTestCaseStatus, logInSuccess, clearUserData, fetchUserNotifications } from '../../actions';
 import { getCurrentRelease } from '../../reducers/release.reducer';
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
@@ -57,8 +56,8 @@ class DefaultLayout extends Component {
   userEmail = null;
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
   loginBackend(user) {
-    let email = user.w3.U3;
-    let name = user.w3.ig;
+    let email = user.Qt.zu;
+    let name = user.Qt.Ad;
     axios.post('/user/login', { email: email, name: name })
       .then(res => {
         console.log('received from user')
@@ -73,6 +72,8 @@ class DefaultLayout extends Component {
   }
   setSigninStatus(isSignedIn) {
     // this.GoogleAuth = gapi.auth2.getAuthInstance();
+    console.log('issigned in')
+    console.log(isSignedIn)
     if (this.GoogleAuth) {
       let user = this.GoogleAuth.currentUser.get();
       let isAuthorized = user.hasGrantedScopes(this.SCOPE);
@@ -88,10 +89,10 @@ class DefaultLayout extends Component {
     if (e) {
       e.preventDefault()
     }
-    this.stopPolling();
+    // this.stopPolling();
     if (this.props.currentUser) {
       this.props.clearUserData();
-
+      this.props.logOut();
       if (this.GoogleAuth) {
         this.GoogleAuth.signOut().then(() => {
           this.props.history.push('/login')
@@ -123,17 +124,17 @@ class DefaultLayout extends Component {
   }
   componentDidMount() {
     // this.props.logInSuccess({ email: 'yatish@diamati.com', isAdmin: true, role: 'ADMIN', name: 'Yatish' });
-    this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
-    gapi.load('auth2', () => {
-      let auth2 = gapi.auth2.init({
-        'apiKey': 'AIzaSyAxV1LfUI_TIjiQ2b8rW0fVYdMwHPeKQTYY',
-        client_id: '271454306292-fnma4vrg7dssj2opv4jovof9v8uq8n1l.apps.googleusercontent.com',
-        'scope': this.SCOPE,
-        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+    // this.props.logInSuccess({ email: 'ADMIN', name: 'ADMIN', isAdmin: true, role: 'ADMIN' });
+    window.gapi.load('auth2', () => {
+      gapi.auth2.init({
+        'apiKey': 'AIzaSyCx0M1qs_LyfAgVmkTmDE6qIfgUiDekM-I',
+        'client_id': '271454306292-q477q7slv0vpe1gep84habq5m2gv58k3.apps.googleusercontent.com',
+        'scope': this.SCOPE
       }).then(() => {
+        this.GoogleAuth = gapi.auth2.getAuthInstance();
+        this.GoogleAuth.isSignedIn.listen((data) => this.setSigninStatus(data));
         // Listen for sign-in state changes.
         // this.GoogleAuth.isSignedIn.listen((data) => this.updateSigninStatus(data));
-        this.GoogleAuth = gapi.auth2.getAuthInstance();
         // Handle initial sign-in state. (Determine if user is already signed in.)
         this.setSigninStatus();
       }).catch(err => { console.log('cannot get details') });
@@ -266,5 +267,5 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 export default connect(mapStateToProps, {
-  logInSuccess, saveReleaseBasicInfo, saveUsers, releaseChange, saveTestCase, saveTestCaseStatus, clearUserData, fetchUserNotifications
+  logOut, logInSuccess, saveReleaseBasicInfo, saveUsers, releaseChange, saveTestCase, saveTestCaseStatus, clearUserData, fetchUserNotifications
 })(DefaultLayout);

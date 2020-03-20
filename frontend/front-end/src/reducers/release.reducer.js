@@ -11,14 +11,15 @@ import {
     SAVE_RELEASE_BASIC_INFO,
     DELETE_RELEASE,
     RELEASE_CHANGE,
-    SAVE_OPTIONS
+    SAVE_OPTIONS,
+    UPDATE_PRIORITY_DASHBOARD
 } from '../actions';
 
 const initialState = {
     releases: [
     ],
     current: {},
-    options: {}
+    options: {selectedPriority: ['P0', 'P1']}
 };
 // {'Storage-DrivesetTCs':'Storage-Driveset','StoragePVC':'Storage-PVC','VagrantCluster':'Vagrant Cluster','
 // SoftwareSolution':'Software Solution','ManagementTestcases': "Management", "MultizoneCluster":"Multizone Cluster",  
@@ -83,12 +84,14 @@ function getAggregate(release) {
                 },
             },
             "NotTested": 0,
-            "NotApplicable": 0
+            "NotApplicable": 0,
+            "Skip": 0
         };
     }
     release.TcAggregate.all.TotalTested = release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.auto.Fail +
         release.TcAggregate.all.Tested.manual.Pass + release.TcAggregate.all.Tested.manual.Fail;
-    release.TcAggregate.all.Skip = release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip
+    release.TcAggregate.all.SkipAndTested = release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip;
+    release.TcAggregate.all.Skip= release.TcAggregate.all.Skip;
     release.TcAggregate.all.Blocked = 0;
 
     // Object.keys(release.TcAggregate.domain).forEach(item => {
@@ -213,6 +216,8 @@ function options(state = initialState.options, action) {
     switch (action.type) {
         case SAVE_OPTIONS:
             return { ...state, ...action, ReleaseSpecific: { ...state.ReleaseSpecific, ...action.ReleaseSpecific } }
+        case UPDATE_PRIORITY_DASHBOARD:
+            return {...state, selectedPriority: action.payload.selectedPriority}
         default:
             return state;
     }
@@ -276,67 +281,53 @@ export const getTCForStatus = (state, id) => {
     if (!release.TcAggregate) {
         return;
     }
-    // let domainTotal = release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail +
-    //     release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass +
-    //     release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip +
-    //     release.TcAggregate.all.NotTested;
+    let p = {};
+    ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'].map(item => p[item]={Pass: 0, Skip: 0, Fail: 0, NotTested: 0});
+    let visibleP = {Pass: 0, Skip: 0, Fail: 0, NotTested: 0};
+    if(release.Priority) {
+        p = {...p, ...release.Priority}
+    }
+    //TODO: get from backend release site
+    // p.P0={...p.P0, Pass: 100, Fail: 200};
+    // p.P1 = {...p.P1, Pass:23, Fail:43};
+
+    if(state.release.options.selectedPriority) {
+        state.release.options.selectedPriority.forEach(item => {
+            visibleP.Pass += p[item].Pass;
+            visibleP.Skip += p[item].Skip;
+            visibleP.Fail += p[item].Fail;
+            visibleP.NotTested += p[item].NotTested;
+        })
+    }
     let data = [{
-        // labels: ['Domains (Total: ' + domainTotal + ')'],
-        labels: [''],
-        // labels: [
-        //     'Fail (' + (release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail) + ')',
-        //     'Pass (' + (release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass) + ')',
-        //     'Blocked (' + (release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip) + ')',
-        //     'Yet to be Tested (' + release.TcAggregate.all.NotTested + ')',
-        // ],
-        // datasets: [
-        //     {
-        //         data: [
-        //             (release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail),
-        //             (release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass),
-        //             (release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip),
-        //             release.TcAggregate.all.NotTested
-        //         ],
-        //         backgroundColor: [
-        //             '#e55353',
-        //             '#2eb85c',
-        //             '#ffc107',
-        //             '#39f',
-        //         ],
-        //         hoverBackgroundColor: [
-        //             '#e55353',
-        //             '#2eb85c',
-        //             '#ffc107',
-        //             '#39f',
-        //         ],
-        //     }],
+        labels: ['', ''],
         datasets: [{
             label: 'Pass',
             backgroundColor: '#01D251',
             borderColor: 'white',
             borderWidth: 1,
-            data: [(release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass)]
+            data: [(release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass), visibleP.Pass]
         },
         {
-            label: 'Block',
+            label: 'Skipped (Testing)',
             backgroundColor: '#FFCE56',
             borderColor: 'white',
             borderWidth: 1,
-            data: [(release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip)]
+            data: [(release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip), visibleP.Skip]
         },
         {
             label: 'Fail',
             backgroundColor: '#d9534f',
             borderColor: 'white',
             borderWidth: 1,
-            data: [(release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail)]
+            data: [(release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail), visibleP.Fail]
         },
         {
             label: 'Not Tested',
             backgroundColor: 'rgba(128,128,128,0.3)',
             borderColor: 'white',
             borderWidth: 1,
-            data: [release.TcAggregate.all.NotTested]
+            data: [release.TcAggregate.all.NotTested, visibleP.NotTested]
         },
         ]
     }];
@@ -353,7 +344,7 @@ export const getTCForStatus = (state, id) => {
                 data: [3643]
             },
             {
-                label: 'Blocked',
+                label: 'Skipped (Testing)',
                 backgroundColor: '#FFCE56',
                 borderColor: 'white',
                 borderWidth: 1,
@@ -386,7 +377,7 @@ export const getTCForStatus = (state, id) => {
                 data: [0]
             },
             {
-                label: 'Block',
+                label: 'Skipped (Testing)',
                 backgroundColor: '#FFCE56',
                 borderColor: 'white',
                 borderWidth: 1,
@@ -424,7 +415,7 @@ export const getTCForStatus = (state, id) => {
     let total = [(release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail) +
         (release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass) +
         (release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip) +
-        release.TcAggregate.all.NotTested];
+        release.TcAggregate.all.NotTested - release.TcAggregate.all.Skip];
     if (release.ReleaseNumber === '2.3.0') {
         total.push(3876)
     } else {
@@ -474,12 +465,13 @@ export const getTCForStrategy = (state, id) => {
     return {
         GUISkip: release.TcAggregate.all.GUISkip ? release.TcAggregate.all.GUISkip : 0,
         GUIAutomated: release.TcAggregate.all.GUIAutomated ? release.TcAggregate.all.GUIAutomated : 0,
-        GUINotAvailable: release.TcAggregate.all.GUINotAvailable ? release.TcAggregate.all.GUINotAvailable : 0,
+        GUINotApplicable: release.TcAggregate.all.GUINotApplicable ? release.TcAggregate.all.GUINotApplicable : 0,
         totalGUI : release.TcAggregate.all.GUI ? release.TcAggregate.all.GUI : 0,
         totalAutomated: release.TcAggregate.all.Automated ? release.TcAggregate.all.Automated : 0,
         totalNonAutomated: release.TcAggregate.all.NonAutomated ? release.TcAggregate.all.NonAutomated : 0,
         totalTests: release.TcAggregate.all.TotalTested + release.TcAggregate.all.NotTested + release.TcAggregate.all.Skip + release.TcAggregate.all.NotApplicable,
         skipped: release.TcAggregate.all.Skip ? release.TcAggregate.all.Skip : 0,
+        SkipAndTested: release.TcAggregate.all.SkipAndTested ? release.TcAggregate.all.SkipAndTested : 0,
         notApplicable: release.TcAggregate.all.NotApplicable,
         needToRun: release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail + release.TcAggregate.all.NotTested
     };

@@ -11,10 +11,11 @@ import {
     Input,
     Label,
     Row,
-    Modal, ModalHeader, ModalBody, ModalFooter, Table, Collapse, Progress, Badge
+    Modal, ModalHeader, ModalBody, ModalFooter, Table, Collapse, Progress, Badge,
+    UncontrolledPopover, PopoverHeader, PopoverBody,
 } from 'reactstrap';
 import { connect } from 'react-redux';
-import { saveReleaseBasicInfo, saveFeatures, saveBugs, saveSingleFeature, statusPage } from '../../../actions';
+import { updateSelectedPriority, saveReleaseBasicInfo, saveFeatures, saveBugs, saveSingleFeature, statusPage } from '../../../actions';
 import { getCurrentRelease } from '../../../reducers/release.reducer';
 import { getTCForStatus, getTCForStrategy } from '../../../reducers/release.reducer';
 import BasicReleaseInfo from '../components/BasicReleaseInfo';
@@ -27,6 +28,7 @@ import { TABLE_OPTIONS } from '../../../constants';
 import { getStyle, hexToRgba } from '@coreui/coreui/dist/js/coreui-utilities';
 import SunburstComponent from '../components/SunburstComponent';
 import { cardChartOpts2, cardChartData2, chartData, chartOptions, stackedBarChart, stackedBarChartOptions } from '../constants';
+import Multiselect from 'react-bootstrap-multiselect';
 const brandPrimary = getStyle('--primary')
 const brandSuccess = getStyle('--success')
 const brandInfo = getStyle('--info')
@@ -138,6 +140,7 @@ class ReleaseSummary extends Component {
         super(props);
 
         this.state = {
+            selectedPriority: ['P0', 'P1'],
             cntr: 0,
             isEditing: false,
             isReleaseStatusEditing: false,
@@ -306,6 +309,24 @@ class ReleaseSummary extends Component {
 
         });
     }
+    selectMultiselect(field, event, checked, select) {
+        let value = event.val();
+                let obj = null;
+                if (checked && this.state.selectedPriority) {
+                    obj = [...this.state.selectedPriority, value];
+                }
+                if (checked && !this.state.selectedPriority) {
+                    obj = [value];
+                }
+                if (!checked && this.state.selectedPriority) {
+                    let array = this.state.selectedPriority;
+                    array.splice(array.indexOf(value), 1);
+                    obj = array;
+                }
+                this.props.updateSelectedPriority({selectedPriority: obj});
+                this.setState({ selectedPriority: obj  });
+    }
+    popoverToggle = () => this.setState({ popoverOpen: !this.state.popoverOpen});
     save() {
         console.log(this.state.basic.updated);
         let data = { ...this.props.selectedRelease, ...this.state.basic.updated, ...this.state.qaStrategy.updated }
@@ -394,6 +415,8 @@ class ReleaseSummary extends Component {
                 }
             })
         }
+        let priorities = ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'].map(item => ({ value: item, selected: this.state.selectedPriority && this.state.selectedPriority.includes(item) }));
+        let multiselect = { 'Priorities': priorities, };
             // { key: 'Test Cases', restrictEdit: true, field: 'run', value: this.props.tcStrategy ? this.props.tcStrategy.totalTests : 0 },
         let tcSkipped = `CLI: ${this.props.tcStrategy ? this.props.tcStrategy.skipped : 0 } GUI: 0`;
         let tcNA = `CLI: ${this.props.tcStrategy ? this.props.tcStrategy.notApplicable : 0 } GUI: 0`;
@@ -853,15 +876,33 @@ class ReleaseSummary extends Component {
                                         </td>
                                     </tr>
                                 }
-                                                                {
+                                                                                                {
                                     <tr>
-                                        <td className='rp-app-table-key'>Test Cases Automated</td>
+                                        <td className='rp-app-table-key'>Test Cases Skipped from Release</td>
                                         <td>
                                         <table>
                                         <tbody>
                                         <tr>
-                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.totalAutomated : 0}</span></td>
-                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUIAutomated : 0}</span></td>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.skipped : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUISkip : 0}</span></td>
+                                            {/* <span>(P0: {this.props.selectedRelease.P0},</span>
+                                            <span>P1: {this.props.selectedRelease.P1},</span>
+                                            <span>P2: {this.props.selectedRelease.P2})</span> */}
+                                            </tr>
+                                        </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                }
+                                                                                                                                {
+                                    <tr>
+                                        <td className='rp-app-table-key'>Test Cases Skipped while Testing</td>
+                                        <td>
+                                        <table>
+                                        <tbody>
+                                        <tr>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.SkipAndTested : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUISkip : 0}</span></td>
                                             {/* <span>(P0: {this.props.selectedRelease.P0},</span>
                                             <span>P1: {this.props.selectedRelease.P1},</span>
                                             <span>P2: {this.props.selectedRelease.P2})</span> */}
@@ -873,13 +914,13 @@ class ReleaseSummary extends Component {
                                 }
                                                                 {
                                     <tr>
-                                        <td className='rp-app-table-key'>Test Cases Skipped</td>
+                                        <td className='rp-app-table-key'>Test Cases Automated</td>
                                         <td>
                                         <table>
                                         <tbody>
                                         <tr>
-                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.skipped : 0}</span></td>
-                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUISkip : 0}</span></td>
+                                        <td style={{ borderTop: '0px', width: '7rem'}}><span>CLI: {this.props.tcStrategy ? this.props.tcStrategy.totalAutomated : 0}</span></td>
+                                        <td style={{ borderTop: '0px'}}><span>GUI: {this.props.tcStrategy ? this.props.tcStrategy.GUIAutomated : 0}</span></td>
                                             {/* <span>(P0: {this.props.selectedRelease.P0},</span>
                                             <span>P1: {this.props.selectedRelease.P1},</span>
                                             <span>P2: {this.props.selectedRelease.P2})</span> */}
@@ -1053,8 +1094,6 @@ class ReleaseSummary extends Component {
                                     : null
                             } */}
                         </div>
-
-                        <Link to={'/release/qastatus'}>
                             <div className="chart-wrapper" style={{ textAlign: "center" }}>
 
 
@@ -1071,13 +1110,35 @@ class ReleaseSummary extends Component {
                                         {
                                             this.props.tcSummary &&
                                             <div className='rp-app-table-key'>
-                                                <span>Domains ({this.props.tcSummary.total[0]})</span>
+                                                <span>CLI ({this.props.tcSummary.total[0]})</span>
+                                                <span>
+                                                        <Button  size="sm" style={{backgroundColor: '#2eb85c', borderRadius: '50%', marginLeft: '0.5rem'}} id="PopoverAssign" type="button">
+                                                            P
+                                                        </Button>
+                                                        <UncontrolledPopover trigger="legacy" placement="bottom" target="PopoverAssign" id="PopoverAssignButton"  toggle={() => this.popoverToggle()} isOpen={this.state.popoverOpen}>
+                                                            <PopoverBody>
+                                                            <div><Multiselect buttonClass='rp-app-multiselect-button' onChange={(e, checked, select) => this.selectMultiselect('Priorities', e, checked, select)}
+                                            data={multiselect['Priorities']} multiple /></div>
+                                                                </PopoverBody>
+                                                                </UncontrolledPopover>
+                                                                </span>
                                             </div>
                                         }
+                                        {/* <div class='row'>
+                                        <div class='col-md-10'> */}
+                                        <Link to={'/release/qastatus'}>
                                         <div>
+
                                             <HorizontalBar height={180} data={this.props.tcSummary && this.props.tcSummary.data[0]} options={stackedBarChartOptions}></HorizontalBar>
+                                           
                                         </div>
-                                    </div>
+                                        </Link>
+                                        </div>
+                                        {/* </div> */}
+
+
+
+                                    {/* </div> */}
                                     <div class='col-md-6'>
                                         {
                                             this.props.tcSummary &&
@@ -1093,7 +1154,7 @@ class ReleaseSummary extends Component {
 
                                 </div>
                             </div>
-                        </Link>
+
                         <Table scroll responsive style={{ overflow: 'scroll', }}>
                             <tbody>
                                 {
@@ -1222,4 +1283,4 @@ const mapStateToProps = (state, ownProps) => ({
 )
 
 
-export default connect(mapStateToProps, { saveReleaseBasicInfo, statusPage, saveFeatures, saveBugs, saveSingleFeature })(ReleaseSummary);
+export default connect(mapStateToProps, { updateSelectedPriority, saveReleaseBasicInfo, statusPage, saveFeatures, saveBugs, saveSingleFeature })(ReleaseSummary);
