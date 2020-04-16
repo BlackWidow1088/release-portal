@@ -30,11 +30,11 @@ import { getDatePicker } from './datepicker';
 import DatePickerEditor from './datePickerEditor';
 
 const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
-const order=['']
+const order = ['']
 class UpdateMultiple extends Component {
     // [field] : {old,new}
     changeLog = {};
-    editedRows= {};
+    editedRows = {};
     constructor(props) {
         super(props);
         this.state = {
@@ -43,15 +43,15 @@ class UpdateMultiple extends Component {
             width: window.screen.availWidth > 1700 ? 500 : 380,
             edited: {},
             errors: {},
-            rowData :[],
+            rowData: [],
             multipleModal: false,
-            
+
             columnDefs: [
                 {
                     cellStyle: { alignItems: 'top' },
-                    headerName: "ID", field: "TABLEID", sortable: true, filter: true, cellStyle: this.renderEditedCell,                    
+                    headerName: "ID", field: "TABLEID", sortable: true, filter: true, cellStyle: this.renderEditedCell,
                     width: 50,
-                    hide:true
+                    hide: true
                 },
                 {
                     cellStyle: { alignItems: 'top' },
@@ -65,7 +65,7 @@ class UpdateMultiple extends Component {
                 },
                 {
                     headerName: "Card Type", field: "CardType",
-                    editable: true, 
+                    editable: true,
                     sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
@@ -75,19 +75,19 @@ class UpdateMultiple extends Component {
 
                 },
                 {
-                    headerName: "Domain", field: "Domain", 
-                    editable: true, 
+                    headerName: "Domain", field: "Domain",
+                    editable: true,
                     sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                 },
                 {
-                    headerName: "SubDomain", field: "SubDomain", 
-                    editable: true, 
+                    headerName: "SubDomain", field: "SubDomain",
+                    editable: true,
                     sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                 },
                 {
                     headerName: "Priority", field: "Priority",
-                     editable: true,
-                      sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
+                    editable: true,
+                    sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     cellEditor: 'selectionEditor',
                     cellEditorParams: {
                         values: ['Select Priority', 'P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Skip', 'NA']
@@ -95,15 +95,15 @@ class UpdateMultiple extends Component {
                 },
                 {
                     headerName: "Description", field: "Description", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    editable: true,autoHeight: true, width: '420',
+                    editable: true, autoHeight: true, width: '420',
                 },
                 {
                     headerName: "Expected Behaviour", field: "ExpectedBehaviour", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    editable: true,autoHeight: true, width: '420',
+                    editable: true, autoHeight: true, width: '420',
                 },
                 {
                     headerName: "Steps", field: "Steps", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
-                    editable: true,autoHeight: true, width: '420',
+                    editable: true, autoHeight: true, width: '420',
                 },
                 {
                     headerName: "Notes", field: "Notes", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
@@ -126,7 +126,7 @@ class UpdateMultiple extends Component {
     }
     multipleToggle = () => this.setState({ multipleModal: !this.state.multipleModal });
     onCellEditingStarted = params => {
-        if(params.data) {
+        if (params.data) {
             if (this.editedRows[`id${params.data.TABLEID}`]) {
                 if (this.editedRows[`id${params.data.TABLEID}`][params.colDef.field]) {
                     this.editedRows[`id${params.data.TABLEID}`][params.colDef.field] =
@@ -141,11 +141,11 @@ class UpdateMultiple extends Component {
         }
     }
     componentWillReceiveProps(newProps) {
-        if(newProps && this.props && newProps.selectedRelease.ReleaseNumber !== this.props.selectedRelease.ReleaseNumber) {
+        if (newProps && this.props && newProps.selectedRelease.ReleaseNumber !== this.props.selectedRelease.ReleaseNumber) {
             this.globalErrors = null;
             this.editedRows = {};
             this.currentID = null;
-            this.setState({multipleErrors: {}})
+            this.setState({ multipleErrors: {} })
             setTimeout(() => this.gridApi.redrawRows(), 1000);
         }
     }
@@ -162,6 +162,13 @@ class UpdateMultiple extends Component {
         'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'Assignee', 'WorkingStatus'
     ];
     arrayFields = ['CardType']
+    getTcName(name) {
+        let tcName = name;
+        if (!tcName || tcName === 'NOT AUTOMATED' || tcName === undefined || tcName === null) {
+            tcName = 'TC NOT AUTOMATED';
+        }
+        return tcName;
+    }
     save() {
         this.gridOperations(false)
         this.props.showLoadingMessage(true);
@@ -182,38 +189,36 @@ class UpdateMultiple extends Component {
             "RequestType": 'PUT',
             "URL": `/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`
         };
-        if(!data.TcName) {
-            data.TcName = 'TC NOT AUTOMATED';
-        }
+        data.TcName = this.getTcName(`${data.TcName}`);
 
         axios.put(`/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`, { ...data })
             .then(res => {
                 this.currentID += 1;
-                if(this.currentID < this.state.multiple.length) {
+                if (this.currentID < this.state.multiple.length) {
                     this.save()
                 } else {
                     this.gridOperations(false)
                     this.props.showLoadingMessage(false);
-                    if(this.globalErrors) {
-                        this.setState({multipleErrors: this.globalErrors});
+                    if (this.globalErrors) {
+                        this.setState({ multipleErrors: this.globalErrors });
                         alert('Some or all tcs failed to create. Those failed updating are highlighted below')
                     } else {
                         alert('All tcs created successfully')
                     }
                     this.gridApi.redrawRows();
                 }
-            }, error => {    
+            }, error => {
                 this.gridOperations(false)
                 this.props.showLoadingMessage(false);
                 console.log('entered here')
-                if(!this.globalErrors) this.globalErrors = {}     
-                this.globalErrors = {...this.globalErrors, [this.state.multiple[this.currentID].TABLEID]: {uploadError: true}}   
+                if (!this.globalErrors) this.globalErrors = {}
+                this.globalErrors = { ...this.globalErrors, [this.state.multiple[this.currentID].TABLEID]: { uploadError: true } }
                 this.currentID += 1;
-                if(this.currentID < this.state.multiple.length) {
+                if (this.currentID < this.state.multiple.length) {
                     this.save()
                 } else {
-                    if(this.globalErrors) {
-                        this.setState({multipleErrors: this.globalErrors});
+                    if (this.globalErrors) {
+                        this.setState({ multipleErrors: this.globalErrors });
                         alert('Some or all tcs failed to create. Those failed updating are highlighted below')
                     } else {
                         alert('Some or all tcs failed to create. Those failed updating are highlighted below')
@@ -228,46 +233,46 @@ class UpdateMultiple extends Component {
         if (domains) {
             domains.sort();
         }
-        if(!this.state.multiple || (this.state.multiple && this.state.multiple.length===0)) {
+        if (!this.state.multiple || (this.state.multiple && this.state.multiple.length === 0)) {
             return;
         }
         let errors = null;
         this.multiChangeLog = {};
         this.state.multiple.forEach(row => {
             ['Domain', 'SubDomain', 'TcID']
-            .forEach(item => {
+                .forEach(item => {
                     let valid = (row[item] && row[item].length > 0);
                     if (!valid) {
-                        if(!errors) errors = {};
-                        errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID],[item]: 'Cannot be empty'} };
+                        if (!errors) errors = {};
+                        errors = { ...errors, [row.TABLEID]: { ...errors[row.TABLEID], [item]: 'Cannot be empty' } };
                     }
-            });
-                if(!domains.includes(row.Domain)) {
-                    if(!errors) errors = {};
-                    errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], Domain: 'Should be a value from given domains'} };
-                }
-                let subdomains = row.Domain && this.props.selectedRelease.TcAggregate && this.props.selectedRelease.TcAggregate.AvailableDomainOptions[row.Domain];
-                if(!subdomains || (subdomains && !subdomains.includes(row.SubDomain))) {
-                    if(!errors) errors = {};
-                    errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], SubDomain: 'Should be a value from given subdomains'} };
-                }
+                });
+            if (!domains.includes(row.Domain)) {
+                if (!errors) errors = {};
+                errors = { ...errors, [row.TABLEID]: { ...errors[row.TABLEID], Domain: 'Should be a value from given domains' } };
+            }
+            let subdomains = row.Domain && this.props.selectedRelease.TcAggregate && this.props.selectedRelease.TcAggregate.AvailableDomainOptions[row.Domain];
+            if (!subdomains || (subdomains && !subdomains.includes(row.SubDomain))) {
+                if (!errors) errors = {};
+                errors = { ...errors, [row.TABLEID]: { ...errors[row.TABLEID], SubDomain: 'Should be a value from given subdomains' } };
+            }
 
-                let card = row.CardType;
-                    if(!['NYNJ', 'BOS', 'COMMON', 'SOFTWARE'].includes(card)) {
-                        if(!errors) errors = {};
-                        errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], CardType: 'Invalid Cardtype'} };
-                    }
-                
-                if(!['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Skip', 'NA'].includes(row.Priority)) {
-                    if(!errors) errors = {};
-                        errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], Priority: 'Invalid Priority'} };
-                }
-             
-            
-           
+            let card = row.CardType;
+            if (!['NYNJ', 'BOS', 'COMMON', 'SOFTWARE'].includes(card)) {
+                if (!errors) errors = {};
+                errors = { ...errors, [row.TABLEID]: { ...errors[row.TABLEID], CardType: 'Invalid Cardtype' } };
+            }
+
+            if (!['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Skip', 'NA'].includes(row.Priority)) {
+                if (!errors) errors = {};
+                errors = { ...errors, [row.TABLEID]: { ...errors[row.TABLEID], Priority: 'Invalid Priority' } };
+            }
+
+
+
             if (!isNaN(row['TcID'])) {
-                if(!errors) errors = {};
-                errors = { ...errors, [row.TABLEID]:{...errors[row.TABLEID], TcID: 'Cannot be a number'} };
+                if (!errors) errors = {};
+                errors = { ...errors, [row.TABLEID]: { ...errors[row.TABLEID], TcID: 'Cannot be a number' } };
             }
 
         })
@@ -292,10 +297,10 @@ class UpdateMultiple extends Component {
         }
     }
     renderEditedCell = (params) => {
-        if(params.data) {
+        if (params.data) {
             console.log('errors inside')
             console.log(this.state.multipleErrors)
-            if(this.state.multipleErrors && this.state.multipleErrors[params.data.TABLEID] && this.state.multipleErrors[params.data.TABLEID].uploadError) {
+            if (this.state.multipleErrors && this.state.multipleErrors[params.data.TABLEID] && this.state.multipleErrors[params.data.TABLEID].uploadError) {
                 return {
                     backgroundColor: 'rgb(237,102,72)',
                     borderStyle: 'solid',
@@ -303,7 +308,7 @@ class UpdateMultiple extends Component {
                     borderColor: 'rgb(237,102,72)'
                 }
             }
-            if(this.state.multipleErrors && this.state.multipleErrors[params.data.TABLEID] && this.state.multipleErrors[params.data.TABLEID][params.colDef.field]) {
+            if (this.state.multipleErrors && this.state.multipleErrors[params.data.TABLEID] && this.state.multipleErrors[params.data.TABLEID][params.colDef.field]) {
                 return {
                     backgroundColor: 'rgb(237,102,72)',
                     borderStyle: 'solid',
@@ -327,22 +332,22 @@ class UpdateMultiple extends Component {
         return { backgroundColor: '' };
     }
     onCellEditing = (params, field, value) => {
-        if(params.data) {
-        if (this.editedRows[`id${params.data.TABLEID}`]) {
-            if (this.editedRows[`id${params.data.TABLEID}`][field]) {
-                this.editedRows[`id${params.data.TABLEID}`][field] =
-                    { ...this.editedRows[`id${params.data.TABLEID}`][field], oldValue: params[field], newValue: value }
-            } else {
-                this.editedRows[`id${params.data.TABLEID}`] =
-                    { ...this.editedRows[`id${params.data.TABLEID}`], [field]: { oldValue: params[field], originalValue: params[field], newValue: value } }
-            }
+        if (params.data) {
+            if (this.editedRows[`id${params.data.TABLEID}`]) {
+                if (this.editedRows[`id${params.data.TABLEID}`][field]) {
+                    this.editedRows[`id${params.data.TABLEID}`][field] =
+                        { ...this.editedRows[`id${params.data.TABLEID}`][field], oldValue: params[field], newValue: value }
+                } else {
+                    this.editedRows[`id${params.data.TABLEID}`] =
+                        { ...this.editedRows[`id${params.data.TABLEID}`], [field]: { oldValue: params[field], originalValue: params[field], newValue: value } }
+                }
 
-        } else {
-            this.editedRows[`id${params.data.TABLEID}`] = {
-                [field]: { oldValue: params[field], originalValue: params[field], newValue: value }
+            } else {
+                this.editedRows[`id${params.data.TABLEID}`] = {
+                    [field]: { oldValue: params[field], originalValue: params[field], newValue: value }
+                }
             }
         }
-    }
     }
     getRowHeight = (params) => {
         if (params.data && params.data.Description) {
@@ -408,19 +413,19 @@ class UpdateMultiple extends Component {
     }
 
     parseData(data, format) {
-        switch(format) {
+        switch (format) {
             case 'XLS':
-            
-                data = data.map((item, index) => ({TABLEID:`id${index}`, ...item}));
+
+                data = data.map((item, index) => ({ TABLEID: `id${index}`, ...item }));
                 this.editedRows = {};
-                this.setState({rowData: data, multipleErrors: {}})
-                
+                this.setState({ rowData: data, multipleErrors: {} })
+
                 this.getData(data);
-            break;
+                break;
         }
     }
     getData = (data) => {
-        this.setState({multiple: data && data[0].gridApi ? data.map(each => each.data): data})
+        this.setState({ multiple: data && data[0].gridApi ? data.map(each => each.data) : data })
     }
 
     render() {
@@ -432,7 +437,7 @@ class UpdateMultiple extends Component {
         if (subdomains) {
             subdomains.sort();
         }
-
+        let allCards = ['BOS', 'NYNJ', 'COMMON', 'SOFTWARE'];
         let users = this.props.users && this.props.users.filter(item => item.role !== 'EXECUTIVE').map(item => item.email);
 
         let cards = ['BOS', 'NYNJ', 'COMMON', 'SOFTWARE'].map(item => ({ value: item, selected: this.state.addTC.CardType && this.state.addTC.CardType.includes(item) }));
@@ -442,86 +447,96 @@ class UpdateMultiple extends Component {
         let rowData = [];
         return (
             <div>
-                <div style={{textAlign: 'center'}} className='rp-app-table-value'>Don't edit the TcID and CardType of rows</div>
+                <div style={{ textAlign: 'center' }} className='rp-app-table-value'>Don't edit the TcID and CardType of rows</div>
                 <Row>
                     {/* <Col className='col-md-5'>
                         <span>Upload CSV file</span>
                         <CSVReader onFileLoaded={data => this.parseData(data, 'CSV')} />
                     </Col> */}
-                    { !this.state.isApiUnderProgress &&
-                                                <Button style={{ position: 'absolute', right: '1rem' }} title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmMultipleToggle()} >
-                                                <i className="fa fa-save"></i>
-                            </Button>
+                    {!this.state.isApiUnderProgress &&
+                        <Button style={{ position: 'absolute', right: '1rem' }} title="Save" size="md" color="transparent" className="float-right rp-rb-save-btn" onClick={() => this.confirmMultipleToggle()} >
+                            <i className="fa fa-save"></i>
+                        </Button>
                     }
 
-                     <Col className='col-md-5' style={{ marginBottom: '1rem' }}>
-                     <div className='rp-app-table-value' style={{ marginBottom: '0.3rem' }}>Allowed Domains and SubDomains</div>
-                     <FormGroup row className="my-0" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                         
-                     {
-                                                <div style={{width: '9rem',marginLeft:'1.5rem'}}>
-                                                    <Input style={{ fontSize: '12px' }} value={this.state.domain} onChange={(e) => this.setState({domain: e.target.value})} type="select" name="selectDomain" id="selectDomain">
-                                                        <option value=''>Select Domain</option>
-                                                        {
-                                                            domains && domains.map(item => <option value={item}>{item}</option>)
-                                                        }
-                                                    </Input>
-                                                </div>
-                                            }
-                                            {
-                                                <div style={{width: '9rem',marginLeft:'0.5rem'}}>
-                                                    <Input  style={{ fontSize: '12px' }} value={this.state.subDomain} onChange={(e) => this.setState({subDomain: e.target.value})}  type="select" name="subDomains" id="subDomains">
-                                                        <option value=''>Select SubDomain</option>
-                                                        {
-                                                            subdomains && subdomains.map(item => <option value={item}>{item}</option>)
-                                                        }
-                                                    </Input>
-                                                </div>
-                                            }
-                                    </FormGroup>
+                    <Col className='col-md-6' style={{ marginBottom: '1rem' }}>
+                        <div className='rp-app-table-value' style={{ marginBottom: '0.3rem' }}>Allowed Domains and SubDomains</div>
+                        <FormGroup row className="my-0" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+
+                            {
+                                <div style={{ width: '9rem', marginLeft: '1.5rem' }}>
+                                    <Input style={{ fontSize: '12px' }} value={this.state.domain} onChange={(e) => this.setState({ domain: e.target.value })} type="select" name="selectDomain" id="selectDomain">
+                                        <option value=''>Select Domain</option>
+                                        {
+                                            domains && domains.map(item => <option value={item}>{item}</option>)
+                                        }
+                                    </Input>
+                                </div>
+                            }
+                            {
+                                <div style={{ width: '9rem', marginLeft: '0.5rem' }}>
+                                    <Input style={{ fontSize: '12px' }} value={this.state.subDomain} onChange={(e) => this.setState({ subDomain: e.target.value })} type="select" name="subDomains" id="subDomains">
+                                        <option value=''>Select SubDomain</option>
+                                        {
+                                            subdomains && subdomains.map(item => <option value={item}>{item}</option>)
+                                        }
+                                    </Input>
+                                </div>
+                            }
+                            {
+                                <div style={{ width: '9rem', marginLeft: '0.5rem' }}>
+                                    <Input style={{ fontSize: '12px' }} type="select" name="cardTypes" id="cardTypes">
+                                        <option value=''>Select CardType</option>
+                                        {
+                                            allCards && allCards.map(item => <option value={item}>{item}</option>)
+                                        }
+                                    </Input>
+                                </div>
+                            }
+                        </FormGroup>
                     </Col>
                     <Col className='col-md-5'>
-                    <span>Upload Excel file</span>
-                        <ExcelReader onFileLoaded={data => this.parseData(data, 'XLS')}/>
+                        <span>Upload Excel file</span>
+                        <ExcelReader onFileLoaded={data => this.parseData(data, 'XLS')} />
                     </Col>
                 </Row>
                 <Row>
                     <Col lg="12">
-                    <div>
-                    <div style={{ width: '100%', height: '400px', marginBottom: '6rem' }}>
-                        <div style={{ width: "100%", height: "100%" }}>
-                            <div
-                                id="myGrid"
-                                style={{
-                                    height: "100%",
-                                    width: "100%",
-                                }}
-                                className="ag-theme-balham"
-                            >
-                                <AgGridReact
-                                    // suppressScrollOnNewData={true}
-                                    rowStyle={{ alignItems: 'top' }}
-                                    // onRowClicked={(e) => this.rowSelect(e)}
-                                    modules={this.state.modules}
-                                    columnDefs={this.state.columnDefs}
-                                    getRowHeight={this.getRowHeight}
-                                    defaultColDef={this.state.defaultColDef}
-                                    rowData={this.state.rowData}
-                                    onGridReady={(params) => this.onGridReady(params)}
-                                    onCellEditingStarted={this.onCellEditingStarted}
-                                    onCellEditingStopped={() => this.getData(this.gridApi.getModel().rowsToDisplay)}
-                                    frameworkComponents={this.state.frameworkComponents}
-                                    stopEditingWhenGridLosesFocus={true}
-                                    overlayLoadingTemplate={this.state.overlayLoadingTemplate}
-                                    overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
-                                // cellDoubleClicked={(e) => this.cellDoubleClicked(e)}
-                                />
+                        <div>
+                            <div style={{ width: '100%', height: '400px', marginBottom: '6rem' }}>
+                                <div style={{ width: "100%", height: "100%" }}>
+                                    <div
+                                        id="myGrid"
+                                        style={{
+                                            height: "100%",
+                                            width: "100%",
+                                        }}
+                                        className="ag-theme-balham"
+                                    >
+                                        <AgGridReact
+                                            // suppressScrollOnNewData={true}
+                                            rowStyle={{ alignItems: 'top' }}
+                                            // onRowClicked={(e) => this.rowSelect(e)}
+                                            modules={this.state.modules}
+                                            columnDefs={this.state.columnDefs}
+                                            getRowHeight={this.getRowHeight}
+                                            defaultColDef={this.state.defaultColDef}
+                                            rowData={this.state.rowData}
+                                            onGridReady={(params) => this.onGridReady(params)}
+                                            onCellEditingStarted={this.onCellEditingStarted}
+                                            onCellEditingStopped={() => this.getData(this.gridApi.getModel().rowsToDisplay)}
+                                            frameworkComponents={this.state.frameworkComponents}
+                                            stopEditingWhenGridLosesFocus={true}
+                                            overlayLoadingTemplate={this.state.overlayLoadingTemplate}
+                                            overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
+                                        // cellDoubleClicked={(e) => this.cellDoubleClicked(e)}
+                                        />
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
-
-
-                    </div>
-                </div>
                     </Col>
                 </Row>
                 <Modal isOpen={this.state.multipleModal} toggle={() => this.multipleToggle()}>
@@ -532,7 +547,7 @@ class UpdateMultiple extends Component {
                     }
                     <ModalBody>
                         {
-                           `Are you sure you want to make the changes?`
+                            `Are you sure you want to make the changes?`
                         }
                     </ModalBody>
                     <ModalFooter>

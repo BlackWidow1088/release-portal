@@ -56,8 +56,8 @@ class DefaultLayout extends Component {
   userEmail = null;
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
   loginBackend(user) {
-    let email = user.Qt.zu;
-    let name = user.Qt.Ad;
+    let email = user.profileObj.email;
+    let name = user.profileObj.name;
     axios.post('/user/login', { email: email, name: name })
       .then(res => {
         console.log('received from user')
@@ -98,7 +98,7 @@ class DefaultLayout extends Component {
           this.props.history.push('/login')
         })
       } else {
-      this.props.history.push('/login')
+        this.props.history.push('/login')
       }
 
     } else {

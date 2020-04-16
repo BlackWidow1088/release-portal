@@ -388,8 +388,6 @@ class EditTC extends Component {
                         {
                             (this.props.testcaseEdit.Domain || this.props.testcaseDetail.Domain) && (this.props.testcaseEdit.SubDomain || this.props.testcaseDetail.SubDomain) &&
                             <React.Fragment>
-
-
                                 {
                                     [
                                         { field: 'TcName', header: 'Tc Name', type: 'text', restrictWidth: false },

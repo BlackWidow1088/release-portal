@@ -30,7 +30,7 @@ class CreateResult extends Component {
 
 
     textFields = [
-        'Build', 'Result', 'Notes', 'E2EFocus','E2ESkipList', 'NoOfTCsPassed', 'Bug', 'Type', 'NoOfIteration', 'CfgFileUsed', 'LinkFlap', 'NoOfDuration',
+        'Build', 'Result', 'Notes', 'E2EFocus','E2ESkipList', 'NoOfTCsPassed', 'Bugs', 'Type', 'NoOfIteration', 'CfgFileUsed', 'LinkFlap', 'NoOfDuration',
         'Tag', 'Setup', 'Date', 'Jenkin'
     ];
     arrayFields = ['CardType']
@@ -66,6 +66,7 @@ class CreateResult extends Component {
     }
 
     save() {
+        this.setState({ isUnderProgress : true});
         let data = {};
         // tc info meta fields
         // data.Role = 'QA';
@@ -95,19 +96,20 @@ class CreateResult extends Component {
 
                 // this.getTcs();
                 // this.setState({ addTC: { Master: true, Domain: '' }, errors: {}, toggleMessage: `TC ${this.state.addTC.TcID} Added Successfully` });
-                this.toggle();
+                // this.toggle();
                 if(this.state.addTC.Type === 'E2E') {
                     this.props.close(`${this.state.addTC.Type}${this.state.addTC.Tag}`)
                 } else {
                     this.props.close(`${this.state.addTC.Type}`)
                 }
-
+                this.setState({ isUnderProgress: false });
             }, error => {
-                this.toggle();
+                // this.toggle();
+                this.setState({ isUnderProgress: false });
                 alert('failed to create TC');
             });
         this.setState({ toggleMessage: null })
-        // this.toggle();
+        this.toggle();
     }
     confirmToggle() {
         let errors = null;
@@ -379,7 +381,7 @@ class CreateResult extends Component {
                                     // { field: 'LinkFlap', header: 'Link Flap', type: 'text', SanityType: 'Stress' },
                                     { field: 'NoOfIteration', header: 'No of Iterations', type: 'number', SanityType: 'Stress' },
                                     { field: 'NoOfDuration', header: 'Successful Duration (days)', type: 'number', SanityType: 'Longevity' },
-                                    { field: 'Bug', header: 'Bug Number', type: 'text', SanityType: this.state.addTC.Type },
+                                    { field: 'Bugs', header: 'Bug Number', type: 'text', SanityType: this.state.addTC.Type },
 
                                 ].map((item, index) => (
 
@@ -469,11 +471,15 @@ class CreateResult extends Component {
                         }
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => this.state.toggleMessage ? this.toggle() : this.save()}>Ok</Button>{' '}
+                        {
+                            !this.state.isUnderProgress &&
+                            <Button color="primary" onClick={() => this.state.toggleMessage ? this.toggle() : this.save()}>Ok</Button>
+                        }
                         {
                             !this.state.toggleMessage &&
                             <Button color="secondary" onClick={() => this.toggle()}>Cancel</Button>
                         }
+                        
                     </ModalFooter>
                 </Modal>
             </div >)

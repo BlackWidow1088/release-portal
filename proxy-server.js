@@ -7,7 +7,7 @@ var http = require('http');
 var httpProxy = require('http-proxy');
 
 // var APP_URL = 'http://localhost:3000';
- var APP_URL = 'http://localhost:5051';
+var APP_URL = 'http://localhost:5051';
 
 // var DJANGOURL = '/api/tcinfo'
 // // var DATA_URL = 'http://172.16.19.57:8000';
@@ -30,6 +30,7 @@ var JIRA_URL = 'http://localhost:5051';
 var USER_URL = 'http://localhost:5051';
 var TEST_URL = 'http://localhost:5051';
 var VAGSERV_URL = 'http://@vagserv3:8000'
+
 
 
 

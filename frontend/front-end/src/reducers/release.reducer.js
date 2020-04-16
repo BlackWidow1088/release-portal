@@ -19,7 +19,7 @@ const initialState = {
     releases: [
     ],
     current: {},
-    options: {selectedPriority: ['P0', 'P1']}
+    options: { selectedPriority: ['P0', 'P1'] }
 };
 // {'Storage-DrivesetTCs':'Storage-Driveset','StoragePVC':'Storage-PVC','VagrantCluster':'Vagrant Cluster','
 // SoftwareSolution':'Software Solution','ManagementTestcases': "Management", "MultizoneCluster":"Multizone Cluster",  
@@ -91,13 +91,8 @@ function getAggregate(release) {
     release.TcAggregate.all.TotalTested = release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.auto.Fail +
         release.TcAggregate.all.Tested.manual.Pass + release.TcAggregate.all.Tested.manual.Fail;
     release.TcAggregate.all.SkipAndTested = release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip;
-    release.TcAggregate.all.Skip= release.TcAggregate.all.Skip;
+    release.TcAggregate.all.Skip = release.TcAggregate.all.Skip;
     release.TcAggregate.all.Blocked = 0;
-
-    // Object.keys(release.TcAggregate.domain).forEach(item => {
-    //     release.TcAggregate.domain[item].TotalTested = 0;
-    //     release.TcAggregate.domain[item].Blocked = 0;
-    // })
 
     release.TcAggregate.uidomain = {};
     alldomains.forEach((item, index) => {
@@ -217,7 +212,7 @@ function options(state = initialState.options, action) {
         case SAVE_OPTIONS:
             return { ...state, ...action, ReleaseSpecific: { ...state.ReleaseSpecific, ...action.ReleaseSpecific } }
         case UPDATE_PRIORITY_DASHBOARD:
-            return {...state, selectedPriority: action.payload.selectedPriority}
+            return { ...state, selectedPriority: action.payload.selectedPriority }
         default:
             return state;
     }
@@ -242,37 +237,6 @@ export const getCurrentRelease = (state) => {
     return current ? current : {}
 }
 
-
-// labels: ['Domains (Total: 1100)', 'GUI (Total: 1500)'],
-// datasets: [{
-//     label: 'Pass',
-//     backgroundColor: '#01D251',
-//     borderColor: 'white',
-//     borderWidth: 1,
-//     data: [10, 600]
-// },
-// {
-//     label: 'Blocked',
-//     backgroundColor: '#FFCE56',
-//     borderColor: 'white',
-//     borderWidth: 1,
-//     data: [300, 300]
-// },
-// {
-//     label: 'Fail',
-//     backgroundColor: '#d9534f',
-//     borderColor: 'white',
-//     borderWidth: 1,
-//     data: [300, 400]
-// },
-// {
-//     label: 'Not Tested',
-//     backgroundColor: 'rgba(128,128,128,0.3)',
-//     borderColor: 'white',
-//     borderWidth: 1,
-//     data: [300, 200]
-// },
-// ]
 export const getTCForStatus = (state, id) => {
     let release = state.release.all.filter(item => item.ReleaseNumber === id)[0];
     if (!release) {
@@ -282,16 +246,16 @@ export const getTCForStatus = (state, id) => {
         return;
     }
     let p = {};
-    ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'].map(item => p[item]={Pass: 0, Skip: 0, Fail: 0, NotTested: 0});
-    let visibleP = {Pass: 0, Skip: 0, Fail: 0, NotTested: 0};
-    if(release.Priority) {
-        p = {...p, ...release.Priority}
+    ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'].map(item => p[item] = { Pass: 0, Skip: 0, Fail: 0, NotTested: 0 });
+    let visibleP = { Pass: 0, Skip: 0, Fail: 0, NotTested: 0 };
+    if (release.Priority) {
+        p = { ...p, ...release.Priority }
     }
     //TODO: get from backend release site
     // p.P0={...p.P0, Pass: 100, Fail: 200};
     // p.P1 = {...p.P1, Pass:23, Fail:43};
 
-    if(state.release.options.selectedPriority) {
+    if (state.release.options.selectedPriority) {
         state.release.options.selectedPriority.forEach(item => {
             visibleP.Pass += p[item].Pass;
             visibleP.Skip += p[item].Skip;
@@ -412,10 +376,11 @@ export const getTCForStatus = (state, id) => {
             }
         },
     }
-    let total = [(release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail) +
-        (release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass) +
-        (release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip) +
-        release.TcAggregate.all.NotTested - release.TcAggregate.all.Skip];
+    // let total = [(release.TcAggregate.all.Tested.auto.Fail + release.TcAggregate.all.Tested.manual.Fail) +
+    //     (release.TcAggregate.all.Tested.auto.Pass + release.TcAggregate.all.Tested.manual.Pass) +
+    //     (release.TcAggregate.all.Tested.auto.Skip + release.TcAggregate.all.Tested.manual.Skip) +
+    //     release.TcAggregate.all.NotTested - release.TcAggregate.all.Skip];
+    let total = [release.TcAggregate.all.All - (release.TcAggregate.all.NotApplicable + release.TcAggregate.all.Skip)];
     if (release.ReleaseNumber === '2.3.0') {
         total.push(3876)
     } else {
@@ -466,10 +431,11 @@ export const getTCForStrategy = (state, id) => {
         GUISkip: release.TcAggregate.all.GUISkip ? release.TcAggregate.all.GUISkip : 0,
         GUIAutomated: release.TcAggregate.all.GUIAutomated ? release.TcAggregate.all.GUIAutomated : 0,
         GUINotApplicable: release.TcAggregate.all.GUINotApplicable ? release.TcAggregate.all.GUINotApplicable : 0,
-        totalGUI : release.TcAggregate.all.GUI ? release.TcAggregate.all.GUI : 0,
+        totalGUI: release.TcAggregate.all.GUI ? release.TcAggregate.all.GUI : 0,
         totalAutomated: release.TcAggregate.all.Automated ? release.TcAggregate.all.Automated : 0,
         totalNonAutomated: release.TcAggregate.all.NonAutomated ? release.TcAggregate.all.NonAutomated : 0,
-        totalTests: release.TcAggregate.all.TotalTested + release.TcAggregate.all.NotTested + release.TcAggregate.all.Skip + release.TcAggregate.all.NotApplicable,
+        // totalTests: release.TcAggregate.all.TotalTested + release.TcAggregate.all.NotTested + release.TcAggregate.all.Skip + release.TcAggregate.all.NotApplicable,
+        totalTests: release.TcAggregate.all.All,
         skipped: release.TcAggregate.all.Skip ? release.TcAggregate.all.Skip : 0,
         SkipAndTested: release.TcAggregate.all.SkipAndTested ? release.TcAggregate.all.SkipAndTested : 0,
         notApplicable: release.TcAggregate.all.NotApplicable,
@@ -803,62 +769,7 @@ export const getTCStrategyForUISubDomainsDistribution = (release, domain) => {
     doughnuts[0].data.datasets = datasets;
     return doughnuts;
 }
-// export const getTCStrategyForUISubDomainsDistribution = (release, domain) => {
-//     if (!release) {
-//         return;
-//     }
-//     if (!release.TcAggregate) {
-//         return;
-//     }
-//     let doughnuts = [{ data: { labels: [], datasets: [] }, title: domain + ' (as per Sub-Domains)' }];
-//     let labels = [];
-//     let datasets = [
-//         {
-//             label: 'Total',
-//             data: [],
-//             backgroundColor: [],
-//             hoverBackgroundColor: []
-//         },
-//         // {
-//         //     label: 'Manual',
-//         //     data: [],
-//         //     backgroundColor: [],
-//         //     hoverBackgroundColor: []
-//         // },
-//         // {
-//         //     label: 'Not Tested',
-//         //     data: [],
-//         //     backgroundColor: [],
-//         //     hoverBackgroundColor: []
-//         // }
-//     ];
-//     for (let i = 0; i < datasets.length; i++) {
-//         Object.keys(release.TcAggregate.domain).forEach((item, index) => {
-//             if (domain === release.TcAggregate.domain[item].tag) {
-//                 datasets[i].backgroundColor.push(colors[index]);
-//                 datasets[i].hoverBackgroundColor.push(colors[index]);
-//             }
-//         })
-//     }
-//     let allTotal = 0;
-//     Object.keys(release.TcAggregate.domain).forEach((item, index) => {
-//         if (domain === release.TcAggregate.domain[item].tag) {
-//             let auto = release.TcAggregate.domain[item].Tested.auto.Pass + release.TcAggregate.domain[item].Tested.auto.Fail + release.TcAggregate.domain[item].Tested.auto.Skip;
-//             let manual = release.TcAggregate.domain[item].Tested.manual.Pass + release.TcAggregate.domain[item].Tested.manual.Fail + release.TcAggregate.domain[item].Tested.manual.Skip;
-//             let nottested = release.TcAggregate.domain[item].NotApplicable
-//             let total = auto + manual + nottested;
-//             labels.push(item + ' (' + total + ')');
-//             datasets[0].data.push(total);
-//             allTotal += total;
-//             // datasets[1].data.push(manual);
-//             // datasets[2].data.push(nottested);
-//         }
-//     });
-//     datasets[0].label = 'Total (' + allTotal + ')';
-//     doughnuts[0].data.labels = labels;
-//     doughnuts[0].data.datasets = datasets;
-//     return doughnuts;
-// }
+
 export const getTCStrategyForUIDomainsDistribution = (release) => {
     if (!release) {
         return;

@@ -19,8 +19,8 @@ class Login extends Component {
     }
   }
   loginBackend(user) {
-    let email = user.Qt.zu;
-    let name = user.Qt.Ad;
+    let email = user.profileObj.email;
+    let name = user.profileObj.name;
     // let email =user.w3.me
     // let name=user.m3.bs
     axios.post('/user/login', { email: email, name: name })

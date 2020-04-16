@@ -166,24 +166,24 @@ class TestCasesAll extends Component {
                 // },
             ],
 
-//             TcID: "PVC_Rbac_S-2.1"
-// TcName: "RbacStaticProvision.PodWithLSAndValidateIOPSWithMultipleQosforLocalNRemoteAuth"
-// Domain: "Storage-PVC"
-// SubDomain: "PVC_Rbac"
-// Scenario: "Local Storage"
-// Description: "Create a Remote-auth user with container-edit role in a namespace. Start fio pods with custom and high QoS and see whether pods are getting expected IOPS"
-// Steps: "NO STEPS PROVIDED"
-// ExpectedBehaviour: "NO EXPECTED BEHAVIOUR PROVIDED"
-// Notes: "NOTES NOT PROVIDED"
-// CardType: "BOS"
-// ServerType: ["UNKNOWN"]
-// WorkingStatus: "UNDERWORK"
-// Date: "2020-02-07T09:25:56.811198Z"
-// Assignee: "UNKNOWN"
-// Creator: "ANONYMOUS"
-// Tag: "NO TAG"
-// Priority: "P2"
-// CurrentStatus
+            //             TcID: "PVC_Rbac_S-2.1"
+            // TcName: "RbacStaticProvision.PodWithLSAndValidateIOPSWithMultipleQosforLocalNRemoteAuth"
+            // Domain: "Storage-PVC"
+            // SubDomain: "PVC_Rbac"
+            // Scenario: "Local Storage"
+            // Description: "Create a Remote-auth user with container-edit role in a namespace. Start fio pods with custom and high QoS and see whether pods are getting expected IOPS"
+            // Steps: "NO STEPS PROVIDED"
+            // ExpectedBehaviour: "NO EXPECTED BEHAVIOUR PROVIDED"
+            // Notes: "NOTES NOT PROVIDED"
+            // CardType: "BOS"
+            // ServerType: ["UNKNOWN"]
+            // WorkingStatus: "UNDERWORK"
+            // Date: "2020-02-07T09:25:56.811198Z"
+            // Assignee: "UNKNOWN"
+            // Creator: "ANONYMOUS"
+            // Tag: "NO TAG"
+            // Priority: "P2"
+            // CurrentStatus
             defaultColDef: { resizable: true },
 
             e2eColumnDefs: [{
@@ -258,8 +258,8 @@ class TestCasesAll extends Component {
         this.setState({ multipleChanges: !this.state.multipleChanges })
     };
     toggle = () => this.setState({ modal: !this.state.modal });
-    popoverToggle = () => this.setState({ popoverOpen: !this.state.popoverOpen});
-    confirmStatusDeleteToggle = () => this.setState({deleteStatusModal: !this.state.deleteStatusModal});
+    popoverToggle = () => this.setState({ popoverOpen: !this.state.popoverOpen });
+    confirmStatusDeleteToggle = () => this.setState({ deleteStatusModal: !this.state.deleteStatusModal });
     confirmToggle() {
         console.log('tc edit')
         console.log(this.props.testcaseEdit);
@@ -326,14 +326,14 @@ class TestCasesAll extends Component {
     // }
     onRowSelected = (params) => {
         console.log(params)
-        if(this.gridApi) {
-            if(params.column && params.column.colId !== "TcID"){
+        if (this.gridApi) {
+            if (params.column && params.column.colId !== "TcID") {
                 // this.gridApi.suppressRowClickSelection = true;
                 return false
-                } else {
+            } else {
                 // this.gridApi.suppressRowClickSelection = false;
                 return true
-                }
+            }
         }
         return false;
     }
@@ -458,24 +458,31 @@ class TestCasesAll extends Component {
     deleteStatus() {
         this.gridOperations(false);
         let selected = this.statusGridApi.getSelectedRows();
-        if(selected && selected[0]) {
+        if (selected && selected[0]) {
             let item = selected[0];
             axios.delete(`/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}/id/${item.TcID}/card/${item.CardType}`)
-            .then(res => {
-                this.gridOperations(true);
-                this.onSuccessTcInfo(item);
-            }, error => {
-                alert('failed to update tc')
-                this.gridOperations(true);
-            });
+                .then(res => {
+                    this.gridOperations(true);
+                    this.onSuccessTcInfo(item);
+                }, error => {
+                    alert('failed to update tc')
+                    this.gridOperations(true);
+                });
         }
+    }
+    getTcName(name) {
+        let tcName = name;
+        if (!tcName || tcName === 'NOT AUTOMATED' || tcName === undefined || tcName === null) {
+            tcName = 'TC NOT AUTOMATED';
+        }
+        return tcName;
     }
     saveSingleTCStatus(data) {
         this.gridOperations(false);
         let status = {};
         status.Domain = this.props.tcDetails.Domain;
         status.SubDomain = this.props.tcDetails.SubDomain;
-        status.TcName = this.props.tcDetails.TcName;
+        status.TcName = this.getTcName(`${this.props.tcDetails.TcName}`);
         status.Build = this.props.testcaseEdit.Build;
         status.Result = this.props.testcaseEdit.CurrentStatus;
         status.CardType = this.props.tcDetails.CardType;
@@ -531,10 +538,10 @@ class TestCasesAll extends Component {
         this.gridOperations(false);
         axios.get(`/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}/id/${data.TcID}/card/${data.CardType}`)
             .then(res => {
-                if(updateRow) {
+                if (updateRow) {
                     if (this.currentSelectedRow && this.currentSelectedRow.node) {
-                        if(res.data.StatusList && res.data.StatusList.length) {
-                            let stats = res.data.StatusList[res.data.StatusList.length -1];
+                        if (res.data.StatusList && res.data.StatusList.length) {
+                            let stats = res.data.StatusList[res.data.StatusList.length - 1];
                             let CurrentStatus = {
                                 Build: `${stats.Build}`,
                                 Result: `${stats.Result}`,
@@ -646,7 +653,7 @@ class TestCasesAll extends Component {
                 let status = {};
                 status.Domain = item.Domain;
                 status.SubDomain = item.SubDomain;
-                status.TcName = item.TcName;
+                status.TcName = this.getTcName(`${item.TcName}`);
                 status.Build = this.state.multi.Build;
                 status.Result = this.state.multi.Result;
                 status.CardType = item.CardType;
@@ -719,7 +726,7 @@ class TestCasesAll extends Component {
     saveLocalMultipleTC(data, resetCount, updateRelease) {
         this.resetRows(resetCount);
         this.props.saveTestCase(data);
-        if(updateRelease) {
+        if (updateRelease) {
             this.updateReleaseInfo();
         }
         setTimeout(this.gridApi.redrawRows(), 0)
@@ -727,7 +734,7 @@ class TestCasesAll extends Component {
 
     textFields = [
         'TcID', 'TcName', 'Scenario', 'Tag', 'Assignee', 'Tag', 'Priority',
-        'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'WorkingStatus', 'Bugs'
+        'Description', 'Steps', 'ExpectedBehaviour', 'Notes', 'WorkingStatus',
     ];
     whichFieldsUpdated(old, latest) {
         let changes = {};
@@ -763,7 +770,7 @@ class TestCasesAll extends Component {
             "URL": `/api/tcinfoput/${this.props.selectedRelease.ReleaseNumber}/id/${this.props.tcDetails.TcID}/card/${this.props.tcDetails.CardType}`
         };
 
-        if (this.props.testcaseEdit.CurrentStatus === 'Pass' || this.props.testcaseEdit.CurrentStatus === 'Fail') {
+        if (this.props.testcaseEdit.CurrentStatus === 'Pass' || this.props.testcaseEdit.CurrentStatus === 'Fail' ||  this.props.testcaseEdit.Bugs) {
             this.saveSingleTCStatus(data);
         } else {
             this.saveSingleTCInfo(data);
@@ -775,31 +782,66 @@ class TestCasesAll extends Component {
         let status = {};
         status.Domain = this.props.tcDetails.Domain;
         status.SubDomain = this.props.tcDetails.SubDomain;
-        status.TcName = this.props.tcDetails.TcName;
-        status.Build = this.props.testcaseEdit.Build;
-        status.Result = this.props.testcaseEdit.CurrentStatus;
-        status.Bugs = this.props.testcaseEdit.Bugs;
+        status.TcName = this.getTcName(`${this.props.tcDetails.TcName}`);
         status.CardType = this.props.tcDetails.CardType;
         status.TcID = this.props.tcDetails.TcID;
-        status.Activity = {
-            Release: this.props.selectedRelease.ReleaseNumber,
-            "TcID": this.props.tcDetails.TcID,
-            "CardType": this.props.tcDetails.CardType,
-            "UserName": this.props.user.email,
-            "LogData": `Status Added: Build: ${this.props.testcaseEdit.Build}, Result: ${this.props.testcaseEdit.CurrentStatus}, CardType: ${this.props.testcaseEdit.CardType}`,
-            "RequestType": 'POST',
-            "URL": `/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}`
-        }
-        axios.post(`/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}`, { ...status })
-            .then(res => {
-                this.gridOperations(true);
-                console.log('updated status')
+        if (this.props.testcaseEdit.CurrentStatus !== 'Fail' && this.props.testcaseEdit.CurrentStatus !== 'Pass') {
+            console.log('passing only bug')
+            console.log(this.props.testcaseEdit);
+            let statusList = this.props.testcaseEdit.StatusList;
+            if(statusList && statusList.length>0) {
+                statusList = statusList[statusList.length-1];
+                status.Build = statusList.Build+'';
+                status.Result = statusList.Result+'';
+                status.Bugs = this.props.testcaseEdit.Bugs+'';
+                status.id=statusList.id+'';
+                status.Activity = {
+                    Release: this.props.selectedRelease.ReleaseNumber,
+                    "TcID": this.props.tcDetails.TcID,
+                    "CardType": this.props.tcDetails.CardType,
+                    "UserName": this.props.user.email,
+                    "LogData": `Bug Updated: Build: ${statusList.Build}, Result: ${statusList.Result}, CardType: ${statusList.CardType}`,
+                    "RequestType": 'PUT',
+                    "URL": `/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}/${statusList.id}`
+                }
+                axios.put(`/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}`, { ...status })
+                    .then(res => {
+                        this.gridOperations(true);
+                        console.log('updated status')
+                        this.saveSingleTCInfo(data);
+                    }, error => {
+                        alert('failed to update tc')
+                        console.log('failed updating status')
+                        this.gridOperations(true);
+                    });
+            } else {
+                statusList = null;
                 this.saveSingleTCInfo(data);
-            }, error => {
-                alert('failed to update tc')
-                console.log('failed updating status')
-                this.gridOperations(true);
-            });
+            }
+        } else {
+            status.Build = this.props.testcaseEdit.Build;
+            status.Result = this.props.testcaseEdit.CurrentStatus;
+            status.Bugs = this.props.testcaseEdit.Bugs;
+            status.Activity = {
+                Release: this.props.selectedRelease.ReleaseNumber,
+                "TcID": this.props.tcDetails.TcID,
+                "CardType": this.props.tcDetails.CardType,
+                "UserName": this.props.user.email,
+                "LogData": `Status Added: Build: ${this.props.testcaseEdit.Build}, Result: ${this.props.testcaseEdit.CurrentStatus}, CardType: ${this.props.testcaseEdit.CardType}`,
+                "RequestType": 'POST',
+                "URL": `/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}`
+            }
+            axios.post(`/api/tcstatus/${this.props.selectedRelease.ReleaseNumber}`, { ...status })
+                .then(res => {
+                    this.gridOperations(true);
+                    console.log('updated status')
+                    this.saveSingleTCInfo(data);
+                }, error => {
+                    alert('failed to update tc')
+                    console.log('failed updating status')
+                    this.gridOperations(true);
+                });
+        }
     }
     saveSingleTCInfo(data) {
         if (this.props.testcaseEdit.NewTcID) {
@@ -859,18 +901,32 @@ class TestCasesAll extends Component {
             }
         }
         let manualFilter = this.state.domain || this.state.subdomain || this.state.CardType || this.state.Priority || this.state.filterValue
-        let pass = 0, fail = 0, automated = 0, total = 0;
+        let pass = 0, fail = 0, notTested = 0, prioritySkip = 0, priorityNA = 0, prioritySkipAndTested = 0, automated = 0, total = 0;
         if (manualFilter && this.gridApi) {
             let rows = this.gridApi.getModel().rowsToDisplay;
             rows.forEach(row => {
-                if(row.data.TcName !== 'TC NOT AUTOMATED') {
+                if (row.data.TcName !== 'TC NOT AUTOMATED' && row.data.TcName !== 'NOT AUTOMATED' && row.data.TcName !== undefined) {
                     automated += 1;
                 }
-                if(row.data.CurrentStatus.Result === 'Pass') {
+                let tested = false;
+                if (row.data.CurrentStatus.Result === 'Pass') {
                     pass += 1;
-                }
-                if(row.data.CurrentStatus.Fail === 'Fail') {
+                    tested = true;
+                } else if (row.data.CurrentStatus.Result === 'Fail') {
                     fail += 1;
+                    tested = true;
+                } else {
+                    notTested += 1;
+                }
+                if (row.data.Priority === 'Skip' || row.data.Priority === 'Skp') {
+                    prioritySkip += 1;
+                }
+                if (row.data.Priority === 'NA') {
+                    priorityNA += 1;
+                }
+
+                if ((row.data.Priority === 'Skip' || row.data.Priority === 'Skip') && tested) {
+                    prioritySkipAndTested += 1;
                 }
             })
             total = this.gridApi.getModel().rowsToDisplay.length;
@@ -936,6 +992,9 @@ class TestCasesAll extends Component {
                                                 this.state.loading && <span style={{ 'marginLeft': '2rem' }}>Please Wait for approx 3 mins to load complete table...</span>
                                             }
                                             {
+                                                !this.state.loading && <span style={{ 'marginLeft': '2rem', fontWeight:'500', color: 'red' }}>TcName is Automated TC Name. It should contain '.' in its name. Please dont add description/scenario in TcName.</span>
+                                            }
+                                            {
                                                 this.state.tcOpen &&
                                                 <div style={{ display: 'inline', position: 'absolute', marginTop: '0.5rem', right: '1.5rem' }}>
                                                     <span className='rp-app-table-value'>Selected: {this.state.selectedRows}</span>
@@ -951,7 +1010,7 @@ class TestCasesAll extends Component {
                         </div>
                         <Collapse isOpen={this.state.tcOpen}>
                             <div>
-                            {/* <div style={{ width: '100%', height: ((window.screen.height * (1 - 0.248)) - 20) + 'px', marginBottom: '6rem' }}> */}
+                                {/* <div style={{ width: '100%', height: ((window.screen.height * (1 - 0.248)) - 20) + 'px', marginBottom: '6rem' }}> */}
                                 <div style={{ width: '100%', height: '600px', marginBottom: '6rem' }}>
                                     <div class="test-header">
                                         <div class="row">
@@ -983,7 +1042,7 @@ class TestCasesAll extends Component {
                                                 <div style={{ width: '8rem', marginLeft: '0.5rem' }}>
                                                     <span>
                                                         <Button disabled={this.state.isApiUnderProgress} id="PopoverAssign" type="button">Apply Multiple</Button>
-                                                        <UncontrolledPopover trigger="legacy" placement="bottom" target="PopoverAssign" id="PopoverAssignButton"  toggle={() => this.popoverToggle()} isOpen={this.state.popoverOpen}>
+                                                        <UncontrolledPopover trigger="legacy" placement="bottom" target="PopoverAssign" id="PopoverAssignButton" toggle={() => this.popoverToggle()} isOpen={this.state.popoverOpen}>
                                                             <PopoverBody>
                                                                 {
                                                                     [
@@ -1071,7 +1130,7 @@ class TestCasesAll extends Component {
                                                                     <span>
                                                                         {
                                                                             this.isAnyChanged &&
-                                                                            <Button disabled={this.state.isApiUnderProgress} title="Save" size="md" className="rp-rb-save-btn" onClick={() => {this.popoverToggle(); this.toggleAll()}} >
+                                                                            <Button disabled={this.state.isApiUnderProgress} title="Save" size="md" className="rp-rb-save-btn" onClick={() => { this.popoverToggle(); this.toggleAll() }} >
                                                                                 Save
                                                                             </Button>
                                                                         }
@@ -1087,11 +1146,11 @@ class TestCasesAll extends Component {
                                                 <Button disabled={this.state.isApiUnderProgress} title="Only selected TCS will be downloaded" size="md" className="rp-rb-save-btn" onClick={() => {
                                                     if (this.gridApi) {
                                                         let selected = this.gridApi.getSelectedRows().length;
-                                                        if(!selected) {
+                                                        if (!selected) {
                                                             alert('Only selected TCs will be downloaded');
                                                             return
                                                         }
-                                                        this.gridApi.exportDataAsCsv({allColumns: true, onlySelected: true});
+                                                        this.gridApi.exportDataAsCsv({ allColumns: true, onlySelected: true });
                                                     }
                                                 }} >
                                                     Download
@@ -1129,9 +1188,9 @@ class TestCasesAll extends Component {
                                                 overlayLoadingTemplate={this.state.overlayLoadingTemplate}
                                                 overlayNoRowsTemplate={this.state.overlayNoRowsTemplate}
                                                 rowMultiSelectWithClick={true}
-                                                // onRowSelected={(params) => this.onRowSelected(params)}
-                                                // onCellFocused={(e) => this.onCellFocused(e)}
-                                                // suppressCopyRowsToClipboard = {true}
+                                            // onRowSelected={(params) => this.onRowSelected(params)}
+                                            // onCellFocused={(e) => this.onCellFocused(e)}
+                                            // suppressCopyRowsToClipboard = {true}
                                             />
                                         </div>
                                     </div>
@@ -1139,7 +1198,14 @@ class TestCasesAll extends Component {
                                         <div style={{ display: 'inline' }}>
                                             <span style={{ marginLeft: '0.5rem' }} className='rp-app-table-value'>Pass: {pass}</span>
                                             <span style={{ marginLeft: '0.5rem' }} className='rp-app-table-value'>Fail: {fail}</span>
-                                            <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>Automated: {automated}</span>
+                                            <span style={{ marginLeft: '0.5rem' }} className='rp-app-table-value'>Automated: {automated}</span>
+
+                                            {/* <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>notTested: {notTested}</span>
+                                            <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>prioritySkip: {prioritySkip}</span>
+                                            <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>priorityNA: {priorityNA}</span>
+                                            <span style={{marginLeft: '0.5rem'}} className='rp-app-table-value'>prioritySkipAndTested: {prioritySkipAndTested}</span> */}
+                                            {/* notTested = 0, prioritySkip=0,priorityNA=0,prioritySkipAndTested=0, */}
+
                                             <span style={{ marginLeft: '0.5rem' }} className='rp-app-table-value'>Total: {total}</span>
                                         </div>
                                         <div style={{
@@ -1224,10 +1290,10 @@ class TestCasesAll extends Component {
                                             <Row>
                                                 <Col lg="6">
                                                     <div class='row'>
-                                                    <div class='col-md-10'>
-                                                        <span className='rp-app-table-title'>Test Status</span>
-                                                    </div>
-                                                    {/* <div class='col-md-2'>
+                                                        <div class='col-md-10'>
+                                                            <span className='rp-app-table-title'>Test Status</span>
+                                                        </div>
+                                                        {/* <div class='col-md-2'>
                                                     <Button style={{float:'right'}} onClick={() => {
                                                         if(this.statusGridApi) {
                                                             let selected = this.statusGridApi.getSelectedRows();
@@ -1241,7 +1307,7 @@ class TestCasesAll extends Component {
                                                     </div> */}
                                                     </div>
 
-                                                    
+
                                                     <div style={{ width: '100%', height: '300px', marginBottom: '3rem' }}>
                                                         <div style={{ width: "100%", height: "100%" }}>
                                                             <div
@@ -1343,7 +1409,7 @@ class TestCasesAll extends Component {
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => { this.toggleDelete();this.delete();  }}>Ok</Button>{' '}
+                        <Button color="primary" onClick={() => { this.toggleDelete(); this.delete(); }}>Ok</Button>{' '}
                         {
                             <Button color="secondary" onClick={() => this.toggleDelete()}>Cancel</Button>
                         }
@@ -1381,7 +1447,7 @@ class TestCasesAll extends Component {
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={() => {this.confirmStatusDeleteToggle(); this.deleteStatus();  }}>Ok</Button>{' '}
+                        <Button color="primary" onClick={() => { this.confirmStatusDeleteToggle(); this.deleteStatus(); }}>Ok</Button>{' '}
                         {
                             <Button color="secondary" onClick={() => this.confirmStatusDeleteToggle()}>Cancel</Button>
                         }

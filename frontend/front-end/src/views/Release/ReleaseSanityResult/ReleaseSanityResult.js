@@ -206,10 +206,10 @@ class ReleaseSanityResult extends Component {
                                 <E2ETestCases tag='SANITY' e2eCounter={this.state.E2ESANITY} deleteCounter={this.state.deleteE2ESanityCntr} saveCounter={this.state.saveE2ESanityCntr}></E2ETestCases>
                             </TabPane>
                             <TabPane tabId="2">
-                                <E2ETestCases tag='DAILY' e2eCounter={this.state.E2EDaily} deleteCounter={this.state.deleteE2EDailyCntr} saveCounter={this.state.saveE2EDailyCntr}></E2ETestCases>
+                                <E2ETestCases tag='DAILY' e2eCounter={this.state.E2EDAILY} deleteCounter={this.state.deleteE2EDailyCntr} saveCounter={this.state.saveE2EDailyCntr}></E2ETestCases>
                             </TabPane>
                             <TabPane tabId="3">
-                                <E2ETestCases tag='WEEKLY' e2eCounter={this.state.E2EWeekly} deleteCounter={this.state.deleteE2EWeeklyCntr} saveCounter={this.state.saveE2EWeeklyCntr}></E2ETestCases>
+                                <E2ETestCases tag='WEEKLY' e2eCounter={this.state.E2EWEEKLY} deleteCounter={this.state.deleteE2EWeeklyCntr} saveCounter={this.state.saveE2EWeeklyCntr}></E2ETestCases>
                             </TabPane>
                             <TabPane tabId="4">
                                 <StressTestCases e2eCounter={this.state.Stress} deleteCounter={this.state.deleteStressCntr} saveCounter={this.state.saveStressCntr}></StressTestCases>

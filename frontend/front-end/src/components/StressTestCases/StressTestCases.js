@@ -122,7 +122,6 @@ class StressTestCases extends Component {
                 {
                     headerName: "Setup Type", field: "Setup", sortable: true, filter: true, cellStyle: this.renderEditedCell, cellClass: 'cell-wrap-text',
                     editable: true,
-                    cellEditor: 'selectionEditor',
                     width:100
                 },
                 {
@@ -150,7 +149,7 @@ class StressTestCases extends Component {
                     width:100
                 },
                 {
-                    headerName: "Bug", field: "Bug",
+                    headerName: "Bugs", field: "Bugs",
                      editable: true, 
                      sortable: true, filter: true, cellStyle: this.renderEditedCell, width: '100', cellClass: 'cell-wrap-text',
                 },
@@ -310,7 +309,7 @@ class StressTestCases extends Component {
             Setup: each.Setup,
             Result:each.Result,
             Build: each.Build,
-            Bug: each.Bug,
+            Bugs: each.Bugs,
             NoOfIteration: each.NoOfIteration,
             CfgFileUsed: each.CfgFileUsed,
             User:each.User,
@@ -363,7 +362,7 @@ class StressTestCases extends Component {
             Date: each.Date,
             Setup: each.Setup,
             Result:each.Result,
-            Bug: each.Bug,
+            Bugs: each.Bugs,
             NoOfIteration: each.NoOfIteration,
             CfgFileUsed: each.CfgFileUsed,
             User:each.User,
@@ -533,7 +532,7 @@ class StressTestCases extends Component {
     }
 
     textFields = [
-        'Build', 'Result', 'Notes', 'E2EFocus', 'NoOfTCsPassed', 'Bug',
+        'Build', 'Result', 'Notes', 'E2EFocus', 'NoOfTCsPassed', 'Bugs',
     ];
     arrayFields = ['CardType', 'User']
     whichFieldsUpdated(old, latest) {
@@ -590,7 +589,7 @@ class StressTestCases extends Component {
                     Notes: selectedRows[id].Notes,
                     E2EFocus: selectedRows[id].E2EFocus,
                     NoOfTCsPassed: selectedRows[id].NoOfTCsPassed,
-                    Bug: selectedRows[id].Bug,
+                    Bugs: selectedRows[id].Bugs,
                     NoOfTCsPassed: selectedRows[id].NoOfTCsPassed,
                     User: selectedRows[id].User,
                     CardType: selectedRows[id].CardType,

@@ -19,6 +19,7 @@ var APP_URL = 'http://localhost:3000';
 
 // var APP_URL = 'http://localhost:5000';
 
+var BACK = ['/django'];
 var URL = ['/api'];
 var USER = ['/user'];
 var JIRA = ['/rest'];
@@ -33,6 +34,7 @@ var TEST = ['/dummy'];
 
 // FOR DEVELOPMENT:
 var DATA_URL = 'http://release:8000';
+var DJANGO_URL = 'http://localhost:8000';
 // var DATA_URL = 'http://192.168.1.76:8000';
 
 // FOR PRODUCTION:
@@ -74,6 +76,12 @@ try {
         for (var i = 0; i < TEST.length; i++) {
             if (req.url.startsWith(TEST[i])) {
                 target = TEST_URL;
+                break;
+            }
+        }
+        for (var i = 0; i < BACK.length; i++) {
+            if (req.url.startsWith(BACK[i])) {
+                target = DJANGO_URL;
                 break;
             }
         }

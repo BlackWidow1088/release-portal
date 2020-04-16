@@ -79,6 +79,13 @@ class CreateTCs extends Component {
         }
         return array;
     }
+    getTcName(name) {
+        let tcName = name;
+        if (!tcName || tcName === 'NOT AUTOMATED' || tcName === undefined || tcName === null) {
+            tcName = 'TC NOT AUTOMATED';
+        }
+        return tcName;
+    }
 
     save() {
         let data = {};
@@ -110,6 +117,7 @@ class CreateTCs extends Component {
             request.note = 'added by non-admin and pending for approval'
         }
         data = { ...data, ...request }
+        data.TcName = this.getTcName(`${data.TcName}`);
         axios.post(`/api/tcinfo/${this.props.selectedRelease.ReleaseNumber}`, { ...data })
             .then(res => {
                 // this.getTcs();
@@ -242,9 +250,11 @@ class CreateTCs extends Component {
                                                 <span className='rp-app-table-title'>Create OR Update Test Case</span>
                                                 {
                                                     this.state.showLoading &&
-                                                    <spam style={{marginLeft: '2rem'}} className='rp-app-table-value'>Please Wait while TC are creating or updating ...</spam>
+                                                    <spam style={{ marginLeft: '2rem' }} className='rp-app-table-value'>Please Wait while TC are creating or updating ...</spam>
                                                 }
-                                                
+                                                {
+                                                    !this.state.showLoading && <span style={{ 'marginLeft': '2rem', fontWeight: '500', color: 'red' }}>TcName is Automated TC Name. It should contain '.' in its name. Please dont add description/scenario in TcName.</span>
+                                                }
                                             </div>
                                         </div>
 
@@ -286,7 +296,7 @@ class CreateTCs extends Component {
                                 </Nav>
                                 <TabContent activeTab={this.state.activeTab}>
                                     <TabPane tabId="1">
-                                        <CreateMultiple showLoadingMessage={(show) => this.setState({showLoading: show})}></CreateMultiple>
+                                        <CreateMultiple showLoadingMessage={(show) => this.setState({ showLoading: show })}></CreateMultiple>
                                     </TabPane>
                                     <TabPane tabId="2">
 
@@ -344,6 +354,7 @@ class CreateTCs extends Component {
                                                     </FormGroup>
                                                 </Col>
                                             }
+
                                             {
                                                 this.state.addTC.Domain && this.state.addTC.SubDomain &&
                                                 <React.Fragment>
@@ -490,7 +501,7 @@ class CreateTCs extends Component {
                                         }
                                     </TabPane>
                                     <TabPane tabId="3">
-                                        <UpdateMultiple showLoadingMessage={(show) => this.setState({showLoading: show})}></UpdateMultiple>
+                                        <UpdateMultiple showLoadingMessage={(show) => this.setState({ showLoading: show })}></UpdateMultiple>
                                     </TabPane>
                                 </TabContent>
 

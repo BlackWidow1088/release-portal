@@ -146,7 +146,7 @@ class E2ETestCases extends Component {
                     width:100
                 },
                 {
-                    headerName: "Bug", field: "Bug",
+                    headerName: "Bugs", field: "Bugs",
                      editable: true, 
                      sortable: true, filter: true, cellStyle: this.renderEditedCell, width: 100, cellClass: 'cell-wrap-text',
                 },
@@ -330,7 +330,7 @@ class E2ETestCases extends Component {
             Date: each.Date,
             Setup: each.Setup,
             Build: each.Build,
-            Bug: each.Bug,
+            Bugs: each.Bugs,
             E2EFocus: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2EFocus : each.E2EFocus,
             E2ESkipList: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2ESkipList : each.E2ESkipList,
             NoOfTCsPassed: each.NoOfTCsPassed,
@@ -388,7 +388,7 @@ class E2ETestCases extends Component {
             Date: each.Date,
             Setup: each.Setup,
             Build: each.Build,
-            Bug: each.Bug,
+            Bugs: each.Bugs,
             E2EFocus: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2EFocus : each.E2EFocus,
             E2ESkipList: this.state.sanityDetails && this.state.sanityDetails.id === each.id ? this.state.sanityDetails.E2ESkipList : each.E2ESkipList,
             NoOfTCsPassed: each.NoOfTCsPassed,
@@ -561,7 +561,7 @@ class E2ETestCases extends Component {
     }
 
     textFields = [
-        'Build', 'Result', 'Notes', 'E2EFocus', 'E2ESkipList', 'NoOfTCsPassed', 'Bug',
+        'Build', 'Result', 'Notes', 'E2EFocus', 'E2ESkipList', 'NoOfTCsPassed', 'Bugs',
     ];
     arrayFields = ['CardType', 'User']
     whichFieldsUpdated(old, latest) {
@@ -618,7 +618,7 @@ class E2ETestCases extends Component {
                     Notes: selectedRows[id].Notes,
                     E2EFocus: selectedRows[id].E2EFocus,
                     NoOfTCsPassed: selectedRows[id].NoOfTCsPassed,
-                    Bug: selectedRows[id].Bug,
+                    Bugs: selectedRows[id].Bugs,
                     NoOfTCsPassed: selectedRows[id].NoOfTCsPassed,
                     User: selectedRows[id].User,
                     CardType: selectedRows[id].CardType,

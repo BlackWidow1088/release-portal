@@ -46,7 +46,7 @@ const ReleaseAdmin = React.lazy(() => import('./views/Release/ReleaseAdmin/Relea
 const ReleaseDocs = React.lazy(() => import('./views/Release/ReleaseDocs/ReleaseDocs'));
 const ReleaseGuiTestMetrics = React.lazy(() => import('./views/Release/ReleaseGuiTestMetrics/ReleaseGuiTestMetrics'))
 const ReleaseSanityResult = React.lazy(() => import('./views/Release/ReleaseSanityResult/ReleaseSanityResult'))
-
+const Examples = React.lazy(() => import('./views/Examples/Examples.js'))
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/', exact: true, name: 'Release Portal' },
@@ -61,7 +61,7 @@ const routes = [
   { path: '/release/user', name: 'Admin Panel', exact: true, component: ReleaseAdmin },
   { path: '/release/docs', name: 'Documentation Panel', exact: true, component: ReleaseDocs },
   { path: '/release/sanityresults', name: 'sanityresults', exact: true, component: ReleaseSanityResult },
-
+  // {path: '/examples', name: 'Examples', exact:true, component:Examples}
   // { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   // { path: '/theme', exact: true, name: 'Theme', component: Colors },
   // { path: '/theme/colors', name: 'Colors', component: Colors },
