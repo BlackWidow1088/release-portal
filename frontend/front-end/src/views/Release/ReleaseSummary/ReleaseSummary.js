@@ -250,7 +250,13 @@ class ReleaseSummary extends Component {
     }
     initialize(release) {
         this.reset();
-        axios.get('/rest/features/' + release)
+        let temp = release;
+        if(temp === 'Spektra 2.4') {
+            temp = '2.4.0'
+        } else if(temp === 'Spektra 3.0') {
+            temp='3.0.0'
+        }
+        axios.get('/rest/features/' + temp)
             .then(res => {
                 this.props.saveFeatures({ data: res.data, id: release })
                 console.log('features')
@@ -259,7 +265,7 @@ class ReleaseSummary extends Component {
             }, err => {
                 console.log('err ', err);
             });
-        axios.get('/rest/bugs/total/' + release)
+        axios.get('/rest/bugs/total/' + temp)
             .then(res => {
                 // console.log('res in bugs')
                 // console.log('total ', res.data.totalBugs.data);
@@ -270,7 +276,7 @@ class ReleaseSummary extends Component {
                 console.log('getting in TOTAL BUGS')
                 console.log('err ', err);
             })
-        axios.get('/rest/bugs/open/' + release)
+        axios.get('/rest/bugs/open/' + temp)
             .then(res => {
                 // console.log('res in bugs')
                 // console.log('total ', res.data.totalBugs.data);
@@ -281,7 +287,7 @@ class ReleaseSummary extends Component {
                 console.log('getting in OPEN BUGS')
                 console.log('err ', err);
             })
-        axios.get('/rest/bugs/resolved/' + release)
+        axios.get('/rest/bugs/resolved/' + temp)
             .then(res => {
                 // console.log('res in bugs')
                 // console.log('total ', res.data.totalBugs.data);

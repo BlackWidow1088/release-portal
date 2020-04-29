@@ -169,7 +169,7 @@ class ReleaseStatus extends Component {
                                                         console.log(item);
                                                         return (
                                                             <tr style={{ cursor: 'pointer' }}>
-                                                                <td style={{width:'250px'}} className='rp-app-table-key'><span onClick={() => window.open(`http://dwsjira1.eng.diamanti.com:8080/browse/${item.key}`)}>{item.key}</span></td>
+                                                                <td style={{ width: '250px' }} className='rp-app-table-key'><span onClick={() => window.open(`https://diamanti.atlassian.net/browse/${item.key}`)}>{item.key}</span></td>
                                                                 <td>{item.fields.summary}</td>
                                                                 {/* <td><Badge className={`rp-bug-${item.fields.status.name}-status-badge`}>{item.fields.status.name}</Badge></td> */}
                                                                 <td style={{width:'250px'}}> <div className={`c-callout c-callout-${item.fields.status.name.toLowerCase()} rp-new-badge`}>
@@ -323,7 +323,7 @@ class ReleaseStatus extends Component {
                                                     this.props.feature.issues.map(item => {
                                                         return (
                                                             <tr style={{ cursor: 'pointer' }} onClick={() => this.getFeatureDetails(item.self)}>
-                                                                <td className='rp-app-table-key' onClick={() => window.open(`http://dwsjira1.eng.diamanti.com:8080/browse/${item.key}`)}>{item.key}</td>
+                                                                <td className='rp-app-table-key' onClick={() => window.open(`https://diamanti.atlassian.net/browse/${item.key}`)}>{item.key}</td>
                                                                 <td>{item.fields.summary}</td>
                                                                 <td>
                                                                     {/* <Badge className='rp-open-status-badge'>{item.fields.status.name}</Badge> */}
@@ -402,7 +402,7 @@ class ReleaseStatus extends Component {
                                                         this.props.singleFeature.fields.subtasks.map(item => {
                                                             return (
                                                                 <tr>
-                                                                    <td  style={{width:'250px'}}><span onClick={() => window.open(`http://dwsjira1.eng.diamanti.com:8080/browse/${item.key}`)}>{item.key}</span></td>
+                                                                    <td style={{ width: '250px' }}><span onClick={() => window.open(`https://diamanti.atlassian.net/browse/${item.key}`)}>{item.key}</span></td>
                                                                     <td>{item.fields.summary}</td>
                                                                     <td  style={{width:'250px'}}>
                                                                         <div className={`c-callout c-callout-${item.fields.status.name.toLowerCase()} rp-new-badge`}>
