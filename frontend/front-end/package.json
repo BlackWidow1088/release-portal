@@ -80,7 +80,7 @@
     "reselect": "^4.0.0",
     "shallowequal": "^1.1.0",
     "simple-line-icons": "^2.4.1",
-    "xlsx": "^0.15.5"
+    "xlsx": "^0.17.0"
   },
   "peerDependencies": {
     "prop-types": ">16.0.0"
